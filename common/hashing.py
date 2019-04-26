@@ -6,6 +6,12 @@ from pprint import pprint
 from . import util
 
 
+class WorkdirHash(dict):
+
+    def __init__(self):
+        super(WorkdirHash, self).__init__()
+
+
 def hash_sha(filepath, buff_size=65536):
     sha = hashlib.sha1()
     with open(filepath, 'rb') as f:
@@ -17,7 +23,7 @@ def hash_sha(filepath, buff_size=65536):
 
 
 @util._time_measure
-def hash_workdir(workdir, include_pattern, exclude_pattern, verbose=0):
+def hash_workdir(workdir, include_pattern=None, exclude_pattern=None, verbose=0):
     """
     Params
     ------
@@ -34,21 +40,20 @@ def hash_workdir(workdir, include_pattern, exclude_pattern, verbose=0):
     -------
     dict
         {
-            relative_file_path_1: {
-                "hash": sha1_digest,
-                "absolute_path": str,
-                "relative_path": str
-            },
-            relative_file_path_2: {
+            relative_file_path: {
                 "hash": sha1_digest,
                 "absolute_path": str,
                 "relative_path": str
             },
             ...
         }
+        `relative_file_path` is in POSIX format
     """
 
-    ret = {}
+    include_pattern = include_pattern if include_pattern else ['**/*']
+    exclude_pattern = exclude_pattern if exclude_pattern else []
+
+    workdir_hash = WorkdirHash()
     workdir = Path(workdir)
     all_paths = []
     for pattern in include_pattern:
@@ -64,7 +69,7 @@ def hash_workdir(workdir, include_pattern, exclude_pattern, verbose=0):
             hash_data = hash_sha(str(p))
             if verbose:
                 print('{}: {}'.format(str(p), hash_data))
-            ret[rel_path.as_posix()] = {
+            workdir_hash[rel_path.as_posix()] = {
                 'hash': hash_data,
                 'absolute_path': str(p),
                 'relative_path': str(rel_path),
@@ -72,4 +77,4 @@ def hash_workdir(workdir, include_pattern, exclude_pattern, verbose=0):
         except:
             if verbose:
                 print('Skipped: {}'.format(str(p)))
-    return ret
+    return workdir_hash

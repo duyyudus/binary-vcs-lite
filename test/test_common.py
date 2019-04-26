@@ -22,12 +22,12 @@ class TestHashing(unittest.TestCase):
         ret = hashing.hash_workdir(
             TEST_DATA_WORKDIR,
             include_pattern=[
-                # '**/*',
-                '*/*.ma',
+                '**/*',
+                # '*/*.ma',
                 # '*/asset.ma',
                 # '*/asset.rig.ma',
-                '*/*/*.tif',
-                '*/*/*.png'
+                # '*/*/*.tif',
+                # '*/*/*.png'
             ],
             exclude_pattern=[
                 # '.jpg$',
@@ -43,7 +43,7 @@ class TestUtil(unittest.TestCase):
         super(TestUtil, self).__init__(*args, **kwargs)
 
     def test_batch_copy(self):
-        path_pair = []        
+        path_pair = []
         for p in TEST_CONCURRENT_COPY_SOURCE.iterdir():
             path_pair.append(
                 (str(p), TEST_CONCURRENT_COPY_TARGET.joinpath(p.name))
@@ -52,7 +52,10 @@ class TestUtil(unittest.TestCase):
         util.batch_copy(path_pair)
 
 if __name__ == '__main__':
-    # hashing_testcase = unittest.TestLoader().loadTestsFromTestCase(TestHashing)
-    # unittest.TextTestRunner(verbosity=2).run(hashing_testcase)
-    util_testcase = unittest.TestLoader().loadTestsFromTestCase(TestUtil)
-    unittest.TextTestRunner(verbosity=2).run(util_testcase)
+    case = 0
+    if case == 0:
+        hashing_testcase = unittest.TestLoader().loadTestsFromTestCase(TestHashing)
+        unittest.TextTestRunner(verbosity=2).run(hashing_testcase)
+    elif case == 1:
+        util_testcase = unittest.TestLoader().loadTestsFromTestCase(TestUtil)
+        unittest.TextTestRunner(verbosity=2).run(util_testcase)
