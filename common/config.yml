@@ -1,0 +1,6 @@
+VCS_FOLDER: '.vcs_lite'
+REPO_FOLDER: '.repo'
+WORKDIR_FOLDER: '.workdir'
+BLOB_FOLDER: 'blob'
+SESSION_FOLDER: 'sessions'
+STATE_FOLDER: 'states'
