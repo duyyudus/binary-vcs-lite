@@ -4,15 +4,36 @@ import re
 from pathlib2 import Path
 from pprint import pprint
 from . import util
+from . import config
 
 
-class WorkdirHash(dict):
+class WorkspaceHash(dict):
+    """
+    A dict with structure
+    {
+        file_id: {
+            "hash": sha1_digest,
+            "relative_path": str,
+            "absolute_path": str
+        },
+        ...
+    }
+
+    `file_id` is just `relative_path` in POSIX format
+    `absolute_path` depend on workspace location
+
+    """
 
     def __init__(self):
-        super(WorkdirHash, self).__init__()
+        super(WorkspaceHash, self).__init__()
+
+    def hash_to_path(self, hash_value):
+        for file_id in self:
+            if hash_value == self[file_id]['hash']:
+                return self[file_id]['relative_path']
 
 
-def hash_sha(filepath, buff_size=65536):
+def _hash_sha(filepath, buff_size=65536):
     sha = hashlib.sha1()
     with open(filepath, 'rb') as f:
         data = f.read(buff_size)
@@ -22,42 +43,42 @@ def hash_sha(filepath, buff_size=65536):
     return sha.hexdigest()
 
 
-@util._time_measure
-def hash_workdir(workdir, include_pattern=None, exclude_pattern=None, verbose=0):
+def get_hash(filepath):
+    return _hash_sha(filepath)
+
+
+# @util._time_measure
+def hash_workspace(workspace_dir,
+                   include_pattern=config.CFG_DICT['INCLUDE_PATTERN'],
+                   exclude_pattern=config.CFG_DICT['EXCLUDE_PATTERN'],
+                   verbose=0):
     """
     Params
     ------
-    workdir : str
+    workspace_dir : str
         Path to working directory
     include_pattern : list of str
-        Glob pattern for globbing files in `workdir`
-        Must be defined relatively from `workdir`
+        Glob pattern for globbing files in `workspace_dir`
+        Must be defined relatively from `workspace_dir`
     exclude_pattern : list of str
-        Regex pattern for filtering out files in `workdir`
+        Regex pattern for filtering out files in `workspace_dir`
         It will override `include_pattern`
 
     Returns
     -------
-    dict
-        {
-            relative_file_path: {
-                "hash": sha1_digest,
-                "absolute_path": str,
-                "relative_path": str
-            },
-            ...
-        }
-        `relative_file_path` is in POSIX format
+    common.hashing.WorkspaceHash
+
     """
 
-    include_pattern = include_pattern if include_pattern else ['**/*']
-    exclude_pattern = exclude_pattern if exclude_pattern else []
+    # Need this in case None is passed into pattern value
+    include_pattern = include_pattern if include_pattern else config.CFG_DICT['INCLUDE_PATTERN']
+    exclude_pattern = exclude_pattern if exclude_pattern else config.CFG_DICT['EXCLUDE_PATTERN']
 
-    workdir_hash = WorkdirHash()
-    workdir = Path(workdir)
+    workspace_hash = WorkspaceHash()
+    workspace_dir = Path(workspace_dir)
     all_paths = []
     for pattern in include_pattern:
-        all_paths.extend(workdir.glob(pattern))
+        all_paths.extend(workspace_dir.glob(pattern))
 
     if verbose:
         print('Hash digest info:')
@@ -65,16 +86,16 @@ def hash_workdir(workdir, include_pattern=None, exclude_pattern=None, verbose=0)
         if util.match_regex_pattern(str(p), exclude_pattern):
             continue
         try:
-            rel_path = p.relative_to(workdir)
-            hash_data = hash_sha(str(p))
+            rel_path = p.relative_to(workspace_dir)
+            hash_data = get_hash(str(p))
             if verbose:
                 print('{}: {}'.format(str(p), hash_data))
-            workdir_hash[rel_path.as_posix()] = {
+            workspace_hash[rel_path.as_posix()] = {
                 'hash': hash_data,
-                'absolute_path': str(p),
                 'relative_path': str(rel_path),
+                'absolute_path': str(p)
             }
         except:
             if verbose:
                 print('Skipped: {}'.format(str(p)))
-    return workdir_hash
+    return workspace_hash

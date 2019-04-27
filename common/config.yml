@@ -1,8 +1,17 @@
-VCS_FOLDER: '.vcs_lite'
+VCS_FOLDER: &vcs_folder '.vcs_lite'
+
 REPO_FOLDER: '.repo'
-WORKSPACE_FOLDER: '.workspace'
 BLOB_FOLDER: 'blob'
 SESSION_FOLDER: 'sessions'
 STATE_FOLDER: 'states'
 
+WORKSPACE_FOLDER: '.workspace'
+HEADER_FILE: 'STATE_HEAD'
+
 LOG_PREFIX: 'VCS-Lite'
+
+INCLUDE_PATTERN:
+  - '**/*'
+
+EXCLUDE_PATTERN: 
+  - *vcs_folder
