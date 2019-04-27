@@ -1,1 +1,0 @@
-asset rig ver 2
