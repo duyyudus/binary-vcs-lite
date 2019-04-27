@@ -3,13 +3,12 @@ import unittest
 from pprint import pprint
 from pathlib2 import Path
 
-sys.path.append(str(Path(__file__).parent.parent))
-from common import hashing
-from common import util
+import setup_test
+from common import util, hashing
 
-TEST_DATA_WORKDIR = Path(__file__).parent.joinpath('data', 'last')
-TEST_CONCURRENT_COPY_SOURCE = Path(r'D:\temp\binary-vcs-lite-test-data\batch_copy\data')
-TEST_CONCURRENT_COPY_TARGET = Path(r'D:\temp\binary-vcs-lite-test-data\batch_copy\cloned_data')
+TEST_SAMPLE_DATA_WORKSPACE_DIR = setup_test.TEST_SAMPLE_DATA_WORKSPACE_DIR
+TEST_OUTPUT_DATA = setup_test.TEST_OUTPUT_DATA
+TEST_OUTPUT_DATA_WORKSPACE_DIR = setup_test.TEST_OUTPUT_DATA_WORKSPACE_DIR
 
 
 class TestHashing(unittest.TestCase):
@@ -17,10 +16,16 @@ class TestHashing(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestHashing, self).__init__(*args, **kwargs)
 
-    def test_hash_workdir(self):
+    def setUp(self):
+        setup_test.create_workspace_dir()
 
-        ret = hashing.hash_workdir(
-            TEST_DATA_WORKDIR,
+    def tearDown(self):
+        setup_test.cleanup_output_data()
+
+    def test_hash_workspace_dir(self):
+        print()
+        workspace_hash = hashing.hash_workspace(
+            TEST_OUTPUT_DATA_WORKSPACE_DIR,
             include_pattern=[
                 '**/*',
                 # '*/*.ma',
@@ -34,7 +39,16 @@ class TestHashing(unittest.TestCase):
                 # '.tx$'
             ]
         )
-        pprint(ret)
+        # pprint(workspace_hash)
+        return workspace_hash
+
+    def test_hash_to_path(self):
+        print()
+        workspace_hash = self.test_hash_workspace_dir()
+        for v in workspace_hash.values():
+            print(v)
+            relative_path = workspace_hash.hash_to_path(v['hash'])
+            self.assertEqual(relative_path, v['relative_path'])
 
 
 class TestUtil(unittest.TestCase):
@@ -42,20 +56,29 @@ class TestUtil(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestUtil, self).__init__(*args, **kwargs)
 
+    def tearDown(self):
+        setup_test.cleanup_output_data()
+
     def test_batch_copy(self):
+        print()
         path_pair = []
-        for p in TEST_CONCURRENT_COPY_SOURCE.iterdir():
+        workspace_dir = Path(TEST_SAMPLE_DATA_WORKSPACE_DIR)
+        for p in workspace_dir.rglob('*.ma'):
+            source = str(p)
+            target = Path(TEST_OUTPUT_DATA).joinpath(p.name)
             path_pair.append(
-                (str(p), TEST_CONCURRENT_COPY_TARGET.joinpath(p.name))
+                (source, target)
             )
 
-        util.batch_copy(path_pair)
+        results = util.batch_copy(path_pair, verbose=1)
+        for r in results:
+            self.assertTrue(Path(r).exists())
 
 if __name__ == '__main__':
-    case = 0
-    if case == 0:
-        hashing_testcase = unittest.TestLoader().loadTestsFromTestCase(TestHashing)
-        unittest.TextTestRunner(verbosity=2).run(hashing_testcase)
-    elif case == 1:
-        util_testcase = unittest.TestLoader().loadTestsFromTestCase(TestUtil)
-        unittest.TextTestRunner(verbosity=2).run(util_testcase)
+    testcase_classes = [
+        TestHashing,
+        TestUtil
+    ]
+    for tc in testcase_classes:
+        testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
+        unittest.TextTestRunner(verbosity=2).run(testcase)

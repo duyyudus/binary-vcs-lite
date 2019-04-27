@@ -1,5 +1,5 @@
 from pathlib2 import Path
-from common import util, hashing
+from common import util
 
 _CFG_DICT = util.CFG_DICT
 
@@ -14,49 +14,96 @@ log_info = util.log_info
 
 
 class Blob(object):
-    """Manage data blob."""
+    """
+    Manage data blob.
 
-    def __init__(self, workdir, repodir):
+    Blob does not care about anything except following info        
+        blob_dir: str or Path
+        workspace_hash: common.hashing.WorkspaceHash
+
+    These data are processed and given to Blob by Workspace and Repo
+
+    """
+
+    def __init__(self, blob_dir):
         """
         Params
         ------
-        workdir : str
-            A folder with `./VCS_FOLDER/WORKSPACE_FOLDER` as sub-folder
-        repodir : str
-            A folder with `./VCS_FOLDER/REPO_FOLDER` as sub-folder
+        blob_dir : str or Path
+            A folder store blob data
         """
 
         super(Blob, self).__init__()
-        self._repodir = repodir
-        self._workdir = workdir
+        self.blob_dir = Path(blob_dir)
 
-    @property
-    def blob_dir(self):
-        return str(Path(self._repodir, VCS_FOLDER, REPO_FOLDER, BLOB_FOLDER))
+    def _parse_hash(self, hash_value):
+        """
+        Parse blob sub folder and blob file name from hash
 
-    def store_blob(self, verbose=0):
+        Returns
+        -------
+        2-tuple
+            (sub_folder_name, blob_file_name)
+        """
+
+        return (hash_value[:2], hash_value[2:])
+
+    def store_blob(self, workspace_hash, verbose=0):
         """
         Put files in working dir to blob
 
         Params
         ------
-        workdir_hash : common.hashing.WorkdirHash
+        workspace_hash : common.hashing.WorkspaceHash
 
         """
 
         log_info('Preparing to store blob...')
 
-        workdir_hash = hashing.hash_workdir(self._workdir)
         path_pair = []
-        for k in workdir_hash:
-            sub_folder = workdir_hash[k]['hash'][:2]
-            blob_name = workdir_hash[k]['hash'][2:]
-            target = str(Path(self.blob_dir, sub_folder, blob_name))
-            path_pair.append((
-                workdir_hash[k]['absolute_path'],
-                target
-            ))
-            # log_info(target)
+        for v in workspace_hash.values():
+            sub_folder, blob_name = self._parse_hash(v['hash'])
+            blob_file = self.blob_dir.joinpath(sub_folder, blob_name)
+            workspace_file = Path(v['absolute_path'])
+            if workspace_file.exists():
+                path_pair.append((workspace_file, blob_file))
+                if verbose:
+                    log_info('Stored blob: {}/{}'.format(
+                        sub_folder,
+                        blob_name
+                    ))
+                    log_info('----{}'.format(str(workspace_file)))
 
-        util.batch_copy(path_pair, verbose)
-        log_info('Stored blob')
+        copied = util.batch_copy(path_pair, verbose=verbose)
+        log_info('Stored all blobs')
+        return copied
+
+    def extract_blob(self, workspace_hash, verbose=0):
+        """
+        Extract files from blob to working dir
+
+        Params
+        ------
+        workspace_hash : common.hashing.WorkspaceHash
+
+        """
+
+        log_info('Preparing to extract blob...')
+
+        path_pair = []
+        for v in workspace_hash.values():
+            sub_folder, blob_name = self._parse_hash(v['hash'])
+            blob_file = self.blob_dir.joinpath(sub_folder, blob_name)
+            workspace_file = Path(v['absolute_path'])
+            if blob_file.exists():
+                path_pair.append((blob_file, workspace_file))
+                if verbose:
+                    log_info('Extracted blob: {}/{}'.format(
+                        sub_folder,
+                        blob_name
+                    ))
+                    log_info('----{}'.format(str(workspace_file)))
+
+        copied = util.batch_copy(path_pair, overwrite=1, verbose=verbose)
+        log_info('Extracted all blobs')
+        return copied
