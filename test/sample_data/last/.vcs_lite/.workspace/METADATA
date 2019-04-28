@@ -1,0 +1,12 @@
+{
+	"repo_record": {
+		"repo_id_1": {
+			"path": "path/to/repo1",
+			"current_state": "state_id"
+		},
+		"repo_id_2": {
+			"path": "path/to/repo2",
+			"current_state": "state_id"
+		}
+	}
+}

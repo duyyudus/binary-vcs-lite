@@ -1,16 +1,5 @@
-from pathlib2 import Path
-from common import util, hashing
-
-_CFG_DICT = util.CFG_DICT
-
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-log_info = util.log_info
+from common.util import *
+from common import hashing
 
 
 class Workspace(object):
@@ -35,31 +24,89 @@ class Workspace(object):
         """
 
         super(Workspace, self).__init__()
-        self.workspace_dir = Path(workspace_dir)
-        self._repo = repo
-        self._state_header = None
-        self.deep_dir = Path(self.workspace_dir, VCS_FOLDER, WORKSPACE_FOLDER)
+        self._workspace_dir = Path(workspace_dir)
+        self._deep_dir = Path(self._workspace_dir, VCS_FOLDER, WORKSPACE['WORKSPACE_FOLDER'])
 
         if init:
             self._init_deep_dir()
         else:
-            assert self.deep_dir.exists(), 'Invalid Workspace folder'
+            assert self._deep_dir.exists(), 'Invalid Workspace folder'
+
+        self._metadata_path = Path(self._deep_dir, WORKSPACE['METADATA_FILE'])
+
+        self.connect_repo(repo)
 
     def _init_deep_dir(self):
-        if not self.deep_dir.exists():
-            self.deep_dir.mkdir(parents=1)
+        if not self._deep_dir.exists():
+            self._deep_dir.mkdir(parents=1)
+
+    @property
+    def deep_dir(self):
+        """Safe way to get `self._deep_dir` value without accidentally re-assign it."""
+
+        return self._deep_dir
+
+    @property
+    def workspace_dir(self):
+        """Safe way to get `self._workspace_dir` value without accidentally re-assign it."""
+
+        return self._workspace_dir
 
     @property
     def workspace_hash(self):
-        return hashing.hash_workspace(self.workspace_dir)
+        return hashing.hash_workspace(self._workspace_dir)
 
     @property
     def current_state(self):
-        return self._state_header
+        return self._current_state
+
+    def _save_current_state(self, repo_id, repo_dir, current_state):
+        metadata = load_json(self._metadata_path)
+
+        if WORKSPACE['REPO_RECORD_KEY'] not in metadata:
+            metadata = {
+                WORKSPACE['REPO_RECORD_KEY']: {
+                    repo_id: {
+                        WORKSPACE['PATH_KEY']: str(repo_dir),
+                        WORKSPACE['CURRENT_STATE_KEY']: current_state
+                    }
+                }
+            }
+        else:
+            metadata[WORKSPACE['REPO_RECORD_KEY']][repo_id] = {
+                WORKSPACE['PATH_KEY']: str(repo_dir),
+                WORKSPACE['CURRENT_STATE_KEY']: current_state
+            }
+        save_json(metadata, self._metadata_path)
+
+    def _load_current_state(self, repo_id):
+        metadata = load_json(self._metadata_path)
+
+        if WORKSPACE['REPO_RECORD_KEY'] not in metadata:
+            return None
+
+        record = metadata[WORKSPACE['REPO_RECORD_KEY']]
+        if repo_id in record:
+            return record[repo_id][WORKSPACE['CURRENT_STATE_KEY']]
+
+    def connect_repo(self, repo):
+        self._repo = repo
+
+        current_state = self._load_current_state(repo.repo_id)
+
+        if not current_state:
+            current_state = repo.latest_state
+            self._save_current_state(
+                repo.repo_id,
+                repo.repo_dir,
+                current_state
+            )
+
+        self._current_state = current_state
 
     def absolute_path(self, relative_path):
         """
         Join relative path and working dir
         """
 
-        return Path(self.workspace_dir, relative_path)
+        return Path(self._workspace_dir, relative_path)
