@@ -1,1 +1,1 @@
-asset rig ver 3
+asset rig ver 4
