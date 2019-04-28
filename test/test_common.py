@@ -1,14 +1,4 @@
-import sys
-import unittest
-from pprint import pprint
-from pathlib2 import Path
-
-import setup_test
-from common import util, hashing
-
-TEST_SAMPLE_DATA_WORKSPACE_DIR = setup_test.TEST_SAMPLE_DATA_WORKSPACE_DIR
-TEST_OUTPUT_DATA = setup_test.TEST_OUTPUT_DATA
-TEST_OUTPUT_DATA_WORKSPACE_DIR = setup_test.TEST_OUTPUT_DATA_WORKSPACE_DIR
+from setup_test import *
 
 
 class TestHashing(unittest.TestCase):
@@ -17,10 +7,10 @@ class TestHashing(unittest.TestCase):
         super(TestHashing, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        setup_test.create_workspace_dir()
+        create_workspace_dir()
 
     def tearDown(self):
-        setup_test.cleanup_output_data()
+        cleanup_output_data()
 
     def test_hash_workspace_dir(self):
         print()
@@ -57,7 +47,7 @@ class TestUtil(unittest.TestCase):
         super(TestUtil, self).__init__(*args, **kwargs)
 
     def tearDown(self):
-        setup_test.cleanup_output_data()
+        cleanup_output_data()
 
     def test_batch_copy(self):
         print()

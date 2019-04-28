@@ -9,6 +9,11 @@ from pprint import pprint
 from . import config
 
 CFG_DICT = config.CFG_DICT
+
+VCS_FOLDER = CFG_DICT['VCS_FOLDER']
+REPO = CFG_DICT['REPO']
+WORKSPACE = CFG_DICT['WORKSPACE']
+
 LOG_PREFIX = CFG_DICT['LOG_PREFIX']
 
 
@@ -105,7 +110,7 @@ def save_json(data, json_path, verbose=0):
 
     """
 
-    if not json_path.exists():
+    if not json_path.parent.exists():
         json_path.parent.mkdir(parents=1)
     with open(str(json_path), 'w') as f:
         f.write(json.dumps(data))

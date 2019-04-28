@@ -1,21 +1,4 @@
-import sys
-import unittest
-from pprint import pprint
-from pathlib2 import Path
-
-import setup_test
-from common import config
-from core import state
-
-_CFG_DICT = config.CFG_DICT
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-TEST_OUTPUT_DATA_WORKSPACE_DIR = setup_test.TEST_OUTPUT_DATA_WORKSPACE_DIR
+from setup_test import *
 
 
 class TestCoreState(unittest.TestCase):
@@ -24,10 +7,10 @@ class TestCoreState(unittest.TestCase):
         super(TestCoreState, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        setup_test.create_workspace_dir()
+        create_workspace_dir()
 
     def tearDown(self):
-        setup_test.cleanup_output_data()
+        cleanup_output_data()
 
     def test_state_node(self):
         print()

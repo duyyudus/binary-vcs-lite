@@ -1,21 +1,4 @@
-import sys
-import unittest
-from pprint import pprint
-from pathlib2 import Path
-
-import setup_test
-from common import config, hashing
-from core import blob
-
-_CFG_DICT = config.CFG_DICT
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-TEST_OUTPUT_DATA_WORKSPACE_DIR = setup_test.TEST_OUTPUT_DATA_WORKSPACE_DIR
+from setup_test import *
 
 
 class TestCoreBlob(unittest.TestCase):
@@ -24,16 +7,16 @@ class TestCoreBlob(unittest.TestCase):
         super(TestCoreBlob, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        setup_test.create_workspace_dir()
+        create_workspace_dir()
 
     def tearDown(self):
-        setup_test.cleanup_output_data()
+        cleanup_output_data()
 
     def test_store_blob(self):
         print()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
-            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO_FOLDER, BLOB_FOLDER)
+            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
         )
         results = b.store_blob(workspace_hash, verbose=1)
         for p in results:
@@ -43,10 +26,10 @@ class TestCoreBlob(unittest.TestCase):
         print()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
-            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO_FOLDER, BLOB_FOLDER)
+            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
         )
         b.store_blob(workspace_hash)
-        setup_test.cleanup_workspace_dir()
+        cleanup_workspace_dir()
 
         results = b.extract_blob(workspace_hash, verbose=1)
         for p in results:

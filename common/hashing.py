@@ -1,8 +1,5 @@
 import hashlib
-import time
-import re
 from pathlib2 import Path
-from pprint import pprint
 from . import util
 from . import config
 
@@ -43,8 +40,14 @@ def _hash_sha(filepath, buff_size=65536):
     return sha.hexdigest()
 
 
-def get_hash(filepath):
+def hash_file(filepath):
     return _hash_sha(filepath)
+
+
+def hash_str(input_str):
+    sha = hashlib.sha1()
+    sha.update(input_str.encode('ascii'))
+    return sha.hexdigest()
 
 
 # @util._time_measure
@@ -87,7 +90,7 @@ def hash_workspace(workspace_dir,
             continue
         try:
             rel_path = p.relative_to(workspace_dir)
-            hash_data = get_hash(str(p))
+            hash_data = hash_file(str(p))
             if verbose:
                 print('{}: {}'.format(str(p), hash_data))
             workspace_hash[rel_path.as_posix()] = {

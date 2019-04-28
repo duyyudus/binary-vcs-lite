@@ -1,16 +1,4 @@
-from pathlib2 import Path
-from common import util
-
-_CFG_DICT = util.CFG_DICT
-
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-log_info = util.log_info
+from common.util import *
 
 
 class IsNotFolder(Exception):
@@ -151,7 +139,7 @@ class State(object):
         """
 
         super(State, self).__init__()
-        self.state_file = Path(state_file)
+        self._state_file = Path(state_file)
 
     def from_workspace_hash(self, workspace_hash):
         """
@@ -179,4 +167,14 @@ class StateChain(object):
         """
 
         super(StateChain, self).__init__()
-        self.state_dir = Path(state_dir)
+        self._state_dir = Path(state_dir)
+
+    @property
+    def state_dir(self):
+        """Safe way to get `self._state_dir` value without accidentally re-assign it."""
+
+        return self._state_dir
+
+    @property
+    def latest_state(self):
+        return '0x00000000000000000000000000000000000000'

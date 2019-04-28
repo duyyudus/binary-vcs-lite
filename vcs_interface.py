@@ -1,17 +1,5 @@
-from pathlib2 import Path
-from common import util
+from common.util import *
 from core import workspace, repo
-
-_CFG_DICT = util.CFG_DICT
-
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-log_info = util.log_info
 
 
 class LocalWorking(object):

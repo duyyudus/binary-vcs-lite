@@ -1,22 +1,4 @@
-import sys
-import unittest
-from pprint import pprint
-from pathlib2 import Path
-
-import setup_test
-from common import config
-import vcs_interface
-
-_CFG_DICT = config.CFG_DICT
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-TEST_OUTPUT_DATA_WORKSPACE_DIR = setup_test.TEST_OUTPUT_DATA_WORKSPACE_DIR
-TEST_OUTPUT_DATA_REMOTE_WORKSPACE_DIR = setup_test.TEST_OUTPUT_DATA_REMOTE_WORKSPACE_DIR
+from setup_test import *
 
 
 class TestVcsInterface(unittest.TestCase):
@@ -25,17 +7,19 @@ class TestVcsInterface(unittest.TestCase):
         super(TestVcsInterface, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        setup_test.create_workspace_dir()
+        create_workspace_dir()
 
     def tearDown(self):
-        setup_test.cleanup_output_data()
+        cleanup_output_data()
 
     def test_local_working(self):
+        print()
         work = vcs_interface.LocalWorking(TEST_OUTPUT_DATA_WORKSPACE_DIR, init=1)
         self.assertTrue(work._repo.deep_dir.exists())
         self.assertTrue(work._workspace.deep_dir.exists())
 
     def test_remote_working(self):
+        print()
         work = vcs_interface.RemoteWorking(
             TEST_OUTPUT_DATA_WORKSPACE_DIR,
             TEST_OUTPUT_DATA_REMOTE_WORKSPACE_DIR,

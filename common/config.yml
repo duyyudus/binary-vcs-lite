@@ -1,12 +1,17 @@
 VCS_FOLDER: &vcs_folder '.vcs_lite'
 
-REPO_FOLDER: '.repo'
-BLOB_FOLDER: 'blob'
-SESSION_FOLDER: 'sessions'
-STATE_FOLDER: 'states'
+REPO:
+  REPO_FOLDER: '.repo'
+  BLOB_FOLDER: 'blob'
+  SESSION_FOLDER: 'sessions'
+  STATE_FOLDER: 'states'
 
-WORKSPACE_FOLDER: '.workspace'
-HEADER_FILE: 'STATE_HEAD'
+WORKSPACE:
+  WORKSPACE_FOLDER: '.workspace'
+  METADATA_FILE: 'METADATA'
+  REPO_RECORD_KEY: 'repo_record'
+  PATH_KEY: 'path'
+  CURRENT_STATE_KEY: 'current_state'
 
 LOG_PREFIX: 'VCS-Lite'
 

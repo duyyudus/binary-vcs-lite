@@ -1,16 +1,4 @@
-from pathlib2 import Path
-from common import util
-
-_CFG_DICT = util.CFG_DICT
-
-VCS_FOLDER = _CFG_DICT['VCS_FOLDER']
-REPO_FOLDER = _CFG_DICT['REPO_FOLDER']
-WORKSPACE_FOLDER = _CFG_DICT['WORKSPACE_FOLDER']
-BLOB_FOLDER = _CFG_DICT['BLOB_FOLDER']
-SESSION_FOLDER = _CFG_DICT['SESSION_FOLDER']
-STATE_FOLDER = _CFG_DICT['STATE_FOLDER']
-
-log_info = util.log_info
+from common.util import *
 
 
 class Blob(object):
@@ -34,7 +22,13 @@ class Blob(object):
         """
 
         super(Blob, self).__init__()
-        self.blob_dir = Path(blob_dir)
+        self._blob_dir = Path(blob_dir)
+
+    @property
+    def blob_dir(self):
+        """Safe way to get `self._blob_dir` value without accidentally re-assign it."""
+
+        return self._blob_dir
 
     def _parse_hash(self, hash_value):
         """
@@ -63,7 +57,7 @@ class Blob(object):
         path_pair = []
         for v in workspace_hash.values():
             sub_folder, blob_name = self._parse_hash(v['hash'])
-            blob_file = self.blob_dir.joinpath(sub_folder, blob_name)
+            blob_file = self._blob_dir.joinpath(sub_folder, blob_name)
             workspace_file = Path(v['absolute_path'])
             if workspace_file.exists():
                 path_pair.append((workspace_file, blob_file))
@@ -74,7 +68,7 @@ class Blob(object):
                     ))
                     log_info('----{}'.format(str(workspace_file)))
 
-        copied = util.batch_copy(path_pair, verbose=verbose)
+        copied = batch_copy(path_pair, verbose=verbose)
         log_info('Stored all blobs')
         return copied
 
@@ -93,7 +87,7 @@ class Blob(object):
         path_pair = []
         for v in workspace_hash.values():
             sub_folder, blob_name = self._parse_hash(v['hash'])
-            blob_file = self.blob_dir.joinpath(sub_folder, blob_name)
+            blob_file = self._blob_dir.joinpath(sub_folder, blob_name)
             workspace_file = Path(v['absolute_path'])
             if blob_file.exists():
                 path_pair.append((blob_file, workspace_file))
@@ -104,6 +98,6 @@ class Blob(object):
                     ))
                     log_info('----{}'.format(str(workspace_file)))
 
-        copied = util.batch_copy(path_pair, overwrite=1, verbose=verbose)
+        copied = batch_copy(path_pair, overwrite=1, verbose=verbose)
         log_info('Extracted all blobs')
         return copied
