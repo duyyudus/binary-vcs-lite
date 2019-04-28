@@ -74,6 +74,20 @@ class TestUtil(unittest.TestCase):
         for r in results:
             self.assertTrue(Path(r).exists())
 
+    def test_util_json(self):
+        print()
+        data = {'test': 1}
+        json_path = Path(TEST_OUTPUT_DATA, 'test_json')
+        util.save_json(data, json_path, verbose=1)
+        loaded_data = util.load_json(json_path, verbose=1)
+        self.assertTrue('test' in loaded_data)
+        self.assertTrue(loaded_data['test'])
+
+        invalid_json = Path(TEST_OUTPUT_DATA, 'test_invalid_json')
+        loaded_data = util.load_json(invalid_json, verbose=1)
+        self.assertTrue('test' not in loaded_data)
+        self.assertTrue(not loaded_data)
+
 if __name__ == '__main__':
     testcase_classes = [
         TestHashing,

@@ -1,6 +1,7 @@
 import os
 import functools
 import time
+import json
 import re
 import shutil
 from pathlib2 import Path
@@ -25,7 +26,7 @@ def _time_measure(func):
 
 def log_info(*args):
     _log_indent = 0
-    message = ''.join(args)
+    message = ''.join([str(a) for a in args])
     indent_str = ''.join([' ' for i in range(_log_indent * 4)])
     print('[{}] :: {}'.format(LOG_PREFIX, indent_str + message))
 
@@ -74,3 +75,39 @@ def batch_copy(path_pair, overwrite=0, verbose=0):
             copied.append(str(target))
 
     return copied
+
+
+def load_json(json_path, verbose=0):
+    """
+    Params
+    ------
+    json_path : str or Path
+
+    """
+
+    json_path = Path(json_path)
+    if not json_path.exists():
+        if verbose:
+            log_info('JSON not found: {}'.format(json_path))
+        return {}
+
+    with open(str(json_path), 'r') as f:
+        if verbose:
+            log_info('Loaded JSON: {}'.format(json_path))
+        return json.loads(f.read())
+
+
+def save_json(data, json_path, verbose=0):
+    """
+    Params
+    ------
+    json_path : str or Path
+
+    """
+
+    if not json_path.exists():
+        json_path.parent.mkdir(parents=1)
+    with open(str(json_path), 'w') as f:
+        f.write(json.dumps(data))
+        if verbose:
+            log_info('Saved JSON: {}'.format(json_path))
