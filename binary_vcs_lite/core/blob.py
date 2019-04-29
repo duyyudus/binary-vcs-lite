@@ -1,4 +1,4 @@
-from common.util import *
+from binary_vcs_lite.common.util import *
 
 
 class Blob(object):
@@ -10,6 +10,12 @@ class Blob(object):
         workspace_hash: common.hashing.WorkspaceHash
 
     These data are processed and given to Blob by Workspace and Repo
+
+    Internal attributes
+        _blob_dir : Path
+
+    Exposed properties
+        blob_dir : Path
 
     """
 

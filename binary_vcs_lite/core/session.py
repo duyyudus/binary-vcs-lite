@@ -1,9 +1,15 @@
-from common.util import *
+from binary_vcs_lite.common.util import *
 
 
 class Session(object):
     """
     Manage session info.
+
+    Internal attributes
+        _session_dir : Path
+
+    Exposed properties
+        session_dir : Path
 
     """
 

@@ -1,5 +1,5 @@
-from common.util import *
-from core import workspace, repo
+from binary_vcs_lite.common.util import *
+from binary_vcs_lite.core import workspace, repo
 
 
 class LocalWorking(object):

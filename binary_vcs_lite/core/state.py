@@ -1,4 +1,4 @@
-from common.util import *
+from binary_vcs_lite.common.util import *
 
 
 class IsNotFolder(Exception):
@@ -25,14 +25,21 @@ class Node(object):
     """
     Represent for a file/folder
 
-    Attributes
-    ----------
-    node_name : str
-    node_path : Path
-    file_hash : str
-    parent : core.state.Node
-    childs : list of core.state.Node
-        Not exists if Node is file
+    Internal attributes
+        _node_name : str
+        _file_hash : str
+        _parent : core.state.Node
+        _childs : list of core.state.Node
+            Not exists if Node is file
+
+    Exposed properties
+        node_name : str
+        node_path : Path
+        file_hash : str
+        parent : core.state.Node
+        childs : list of core.state.Node
+        is_file : bool
+        child_count : int
 
     """
 
@@ -48,15 +55,48 @@ class Node(object):
         """
 
         super(Node, self).__init__()
-        self.node_name = node_name
-        self.file_hash = file_hash
-        self.parent = parent
+        self._node_name = node_name
+        self._file_hash = file_hash
+        self._parent = parent
         self._verbose = verbose
 
         if not self.is_file:
-            self.childs = []
+            self._childs = []
 
         self.set_parent(parent)
+
+    @property
+    def node_name(self):
+        return self._node_name
+
+    @property
+    def file_hash(self):
+        return self._file_hash
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @property
+    def childs(self):
+        return [] if self.is_file else self._childs
+
+    @property
+    def is_file(self):
+        return 1 if self._file_hash else 0
+
+    @property
+    def child_count(self):
+        return len(self._childs) if not self.is_file else None
+
+    @property
+    def node_path(self):
+        cur_parent = self._parent
+        parts = [self._node_name]
+        while cur_parent:
+            parts.insert(0, cur_parent.node_name)
+            cur_parent = cur_parent.parent
+        return Path(*parts)
 
     def _validate_node(self, node):
         if node == self:
@@ -72,15 +112,15 @@ class Node(object):
         if not self._validate_node(parent):
             return 0
 
-        if self.parent != parent:
+        if self._parent != parent:
             # Remove `self` from current parent childs
-            cur_parent = self.parent
+            cur_parent = self._parent
             if self in cur_parent.childs:
                 cur_parent.childs.remove(self)
 
         if parent.is_file:
             raise IsNotFolder(parent.node_path)
-        self.parent = parent
+        self._parent = parent
         if self._verbose:
             log_info('"{}" set "{}" as parent'.format(
                 self.node_path,
@@ -97,7 +137,7 @@ class Node(object):
 
         if self.is_file:
             raise IsNotFolder(self.node_path)
-        self.childs.append(child)
+        self._childs.append(child)
         if self._verbose:
             log_info('"{}" added "{}" as child'.format(
                 self.node_path,
@@ -108,22 +148,40 @@ class Node(object):
             child.set_parent(self)
         return 1
 
-    @property
-    def is_file(self):
-        return 1 if self.file_hash else 0
+
+class StateTree(object):
+    """
+    A tree of Node objects.
+
+    Internal attributes
+        _tree_name : str
+        _root : core.state.Node
+
+    Exposed properties
+        tree_name : str
+        root : core.state.Node
+
+    """
+
+    def __init__(self, tree_name):
+        """
+        Params
+        ------
+        tree_name : str
+
+        """
+
+        super(StateTree, self).__init__()
+        self._tree_name = tree_name
+        self._root = Node('{}_root'.format(tree_name))
 
     @property
-    def child_count(self):
-        return len(self.childs) if not self.is_file else None
+    def tree_name(self):
+        return self._tree_name
 
     @property
-    def node_path(self):
-        cur_parent = self.parent
-        parts = [self.node_name]
-        while cur_parent:
-            parts.insert(0, cur_parent.node_name)
-            cur_parent = cur_parent.parent
-        return Path(*parts)
+    def root(self):
+        return self._root
 
 
 class State(object):

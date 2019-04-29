@@ -1,5 +1,5 @@
-from common.util import *
-from common import hashing
+from binary_vcs_lite.common.util import *
+from binary_vcs_lite.common import hashing
 
 
 class Workspace(object):
@@ -10,6 +10,18 @@ class Workspace(object):
     and handle workspace-related operations
 
     It must connect to a `core.repo.Repo`
+
+    Internal attributes
+        _workspace_dir : Path
+        _deep_dir : Path
+        _metadata_path : Path
+        _current_state : str
+
+    Exposed properties
+        deep_dir : Path
+        workspace_dir : Path
+        workspace_hash : str
+        current_state : str
 
     """
 
@@ -36,10 +48,6 @@ class Workspace(object):
 
         self.connect_repo(repo)
 
-    def _init_deep_dir(self):
-        if not self._deep_dir.exists():
-            self._deep_dir.mkdir(parents=1)
-
     @property
     def deep_dir(self):
         """Safe way to get `self._deep_dir` value without accidentally re-assign it."""
@@ -59,6 +67,10 @@ class Workspace(object):
     @property
     def current_state(self):
         return self._current_state
+
+    def _init_deep_dir(self):
+        if not self._deep_dir.exists():
+            self._deep_dir.mkdir(parents=1)
 
     def _save_current_state(self, repo_id, repo_dir, current_state):
         metadata = load_json(self._metadata_path)

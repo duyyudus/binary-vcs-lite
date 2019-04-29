@@ -1,6 +1,6 @@
-from common.util import *
-from common import hashing
-from core import blob, state, session
+from binary_vcs_lite.common.util import *
+from binary_vcs_lite.common import hashing
+from binary_vcs_lite.core import blob, state, session
 
 
 class Repo(object):
@@ -11,6 +11,23 @@ class Repo(object):
         `core.blob.Blob`
         `core.state.StateChain`
         `core.session.Session`
+
+    Internal attributes
+        _repo_dir : Path
+        _deep_dir : Path
+        _repo_id : Path
+        _blob_dir : Path
+        _state_dir : Path
+        _session_dir : Path
+        _blob : core.blob.Blob
+        _state_chain : core.state.StateChain
+        _session : core.session.Session
+
+    Exposed properties
+        deep_dir : Path
+        repo_dir : Path
+        repo_id : str
+        latest_state : str
 
     """
 
@@ -40,13 +57,6 @@ class Repo(object):
         self._state_chain = state.StateChain(self._state_dir)
         self._session = session.Session(self._session_dir)
 
-    def _init_deep_dir(self):
-        if not self._deep_dir.exists():
-            self._deep_dir.mkdir(parents=1)
-
-    def _calculate_repo_id(self):
-        return hashing.hash_str(self._deep_dir.as_posix())
-
     @property
     def deep_dir(self):
         """Safe way to get `self._deep_dir` value without accidentally re-assign it."""
@@ -68,6 +78,13 @@ class Repo(object):
     @property
     def latest_state(self):
         return self._state_chain.latest_state
+
+    def _init_deep_dir(self):
+        if not self._deep_dir.exists():
+            self._deep_dir.mkdir(parents=1)
+
+    def _calculate_repo_id(self):
+        return hashing.hash_str(self._deep_dir.as_posix())
 
     def store_blob(self, workspace_hash):
         """
