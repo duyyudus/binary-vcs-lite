@@ -8,14 +8,14 @@ class WorkspaceHash(dict):
 
         {
             file_id: {
-                "hash": sha1_digest,
-                "relative_path": str,
-                "absolute_path": str
+                hash_key: sha1_digest,
+                relative_path_key: str,
+                absolute_path_key: str
             },            
         }
 
-        `file_id` is just `relative_path` in POSIX format
-        `absolute_path` depend on workspace location
+        Key-value of `file_id` is paired-value of `relative_path_key` in POSIX format
+        Paired-value of `absolute_path_key` depend on workspace location
 
     """
 
@@ -24,8 +24,8 @@ class WorkspaceHash(dict):
 
     def hash_to_path(self, hash_value):
         for file_id in self:
-            if hash_value == self[file_id]['hash']:
-                return self[file_id]['relative_path']
+            if hash_value == self[file_id][WORKSPACE['HASH_KEY']]:
+                return self[file_id][WORKSPACE['RELATIVE_PATH_KEY']]
 
 
 def _hash_sha(filepath, buff_size=65536):
@@ -78,7 +78,7 @@ def hash_workspace(workspace_dir,
         all_paths.extend(workspace_dir.glob(pattern))
 
     if verbose:
-        print('Hash digest info:')
+        log_info('Hash digest info:')
     for p in all_paths:
         if match_regex_pattern(str(p), exclude_pattern):
             continue
@@ -86,13 +86,13 @@ def hash_workspace(workspace_dir,
             rel_path = p.relative_to(workspace_dir)
             hash_data = hash_file(str(p))
             if verbose:
-                print('{}: {}'.format(str(p), hash_data))
+                log_info('{}: {}'.format(str(p), hash_data))
             workspace_hash[rel_path.as_posix()] = {
-                'hash': hash_data,
-                'relative_path': str(rel_path),
-                'absolute_path': str(p)
+                WORKSPACE['HASH_KEY']: hash_data,
+                WORKSPACE['RELATIVE_PATH_KEY']: str(rel_path),
+                WORKSPACE['ABSOLUTE_PATH_KEY']: str(p)
             }
         except:
             if verbose:
-                print('Skipped: {}'.format(str(p)))
+                log_info('Skipped: {}'.format(str(p)))
     return workspace_hash

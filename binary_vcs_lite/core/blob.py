@@ -61,7 +61,7 @@ class Blob(object):
         for v in workspace_hash.values():
             sub_folder, blob_name = self._parse_hash(v['hash'])
             blob_file = self._blob_dir.joinpath(sub_folder, blob_name)
-            workspace_file = Path(v['absolute_path'])
+            workspace_file = Path(v[WORKSPACE['ABSOLUTE_PATH_KEY']])
             if workspace_file.exists():
                 path_pair.append((workspace_file, blob_file))
                 if verbose:
@@ -89,7 +89,7 @@ class Blob(object):
         for v in workspace_hash.values():
             sub_folder, blob_name = self._parse_hash(v['hash'])
             blob_file = self._blob_dir.joinpath(sub_folder, blob_name)
-            workspace_file = Path(v['absolute_path'])
+            workspace_file = Path(v[WORKSPACE['ABSOLUTE_PATH_KEY']])
             if blob_file.exists():
                 path_pair.append((blob_file, workspace_file))
                 if verbose:

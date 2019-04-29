@@ -15,6 +15,7 @@ REPO = CFG_DICT['REPO']
 WORKSPACE = CFG_DICT['WORKSPACE']
 
 LOG_PREFIX = CFG_DICT['LOG_PREFIX']
+_LOG_ON = 1
 
 
 def _time_measure(func):
@@ -24,16 +25,26 @@ def _time_measure(func):
     def wrapper(*args, **kwargs):
         st = time.time()
         ret = func(*args, **kwargs)
-        print('Running time of {}() : {} seconds'.format(func.__name__, str(time.time() - st)))
+        log_info('Running time of {}() : {} seconds'.format(func.__name__, str(time.time() - st)))
         return ret
     return wrapper
 
 
 def log_info(*args):
+    if not _LOG_ON:
+        return 0
     _log_indent = 0
     message = ''.join([str(a) for a in args])
+    if not message:
+        print('')
+        return 0
     indent_str = ''.join([' ' for i in range(_log_indent * 4)])
     print('[{}] :: {}'.format(LOG_PREFIX, indent_str + message))
+
+
+def switch_log_vcs(is_on):
+    global _LOG_ON
+    _LOG_ON = is_on
 
 
 def match_regex_pattern(input_str, patterns):

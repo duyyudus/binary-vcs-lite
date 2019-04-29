@@ -12,6 +12,9 @@ WORKSPACE:
   REPO_RECORD_KEY: 'repo_record'
   PATH_KEY: 'path'
   CURRENT_STATE_KEY: 'current_state'
+  HASH_KEY: 'hash'
+  RELATIVE_PATH_KEY: 'relative_path'
+  ABSOLUTE_PATH_KEY: 'absolute_path'
 
 LOG_PREFIX: 'VCS-Lite'
 
