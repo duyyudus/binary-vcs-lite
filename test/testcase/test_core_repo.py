@@ -13,7 +13,7 @@ class TestCoreRepo(unittest.TestCase):
         cleanup_output_data()
 
     def test_repo_attr(self):
-        print()
+        log_info()
         new_repo = repo.Repo(TEST_OUTPUT_DATA_WORKSPACE_DIR, init=1)
         self.assertEqual(new_repo.repo_dir, Path(TEST_OUTPUT_DATA_WORKSPACE_DIR))
         self.assertEqual(
@@ -26,14 +26,15 @@ class TestCoreRepo(unittest.TestCase):
         )
 
 
-if __name__ == '__main__':
+@log_test(__file__)
+def run():
     testcase_classes = [
         TestCoreRepo,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
-    print('')
-    print('SUCCEED: {}'.format(__file__))
-    print('')
-    print('')
+
+
+if __name__ == '__main__':
+    run()

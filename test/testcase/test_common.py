@@ -13,7 +13,7 @@ class TestHashing(unittest.TestCase):
         cleanup_output_data()
 
     def test_hash_workspace_dir(self):
-        print()
+        log_info()
         workspace_hash = hashing.hash_workspace(
             TEST_OUTPUT_DATA_WORKSPACE_DIR,
             include_pattern=[
@@ -29,15 +29,18 @@ class TestHashing(unittest.TestCase):
                 # '.tx$'
             ]
         )
-        # pprint(workspace_hash)
+        for k in workspace_hash:
+            self.assertTrue(
+                Path(workspace_hash[k][WORKSPACE['ABSOLUTE_PATH_KEY']]).exists()
+            )
         return workspace_hash
 
     def test_hash_to_path(self):
-        print()
+        log_info()
         workspace_hash = self.test_hash_workspace_dir()
-        for v in workspace_hash.values():            
+        for v in workspace_hash.values():
             relative_path = workspace_hash.hash_to_path(v['hash'])
-            self.assertEqual(relative_path, v['relative_path'])
+            self.assertEqual(relative_path, v[WORKSPACE['RELATIVE_PATH_KEY']])
 
 
 class TestUtil(unittest.TestCase):
@@ -49,7 +52,7 @@ class TestUtil(unittest.TestCase):
         cleanup_output_data()
 
     def test_batch_copy(self):
-        print()
+        log_info()
         path_pair = []
         workspace_dir = Path(TEST_SAMPLE_DATA_WORKSPACE_DIR)
         for p in workspace_dir.rglob('*.ma'):
@@ -64,7 +67,7 @@ class TestUtil(unittest.TestCase):
             self.assertTrue(Path(r).exists())
 
     def test_util_json(self):
-        print()
+        log_info()
         data = {'test': 1}
         json_path = Path(TEST_OUTPUT_DATA, 'test_json')
         util.save_json(data, json_path, verbose=1)
@@ -77,7 +80,9 @@ class TestUtil(unittest.TestCase):
         self.assertTrue('test' not in loaded_data)
         self.assertTrue(not loaded_data)
 
-if __name__ == '__main__':
+
+@log_test(__file__)
+def run():
     testcase_classes = [
         TestHashing,
         TestUtil
@@ -85,7 +90,7 @@ if __name__ == '__main__':
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
-    print('')
-    print('SUCCEED: {}'.format(__file__))
-    print('')
-    print('')
+
+
+if __name__ == '__main__':
+    run()

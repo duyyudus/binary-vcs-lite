@@ -22,14 +22,15 @@ class TestCoreWorkspace(unittest.TestCase):
         )
 
 
-if __name__ == '__main__':
+@log_test(__file__)
+def run():
     testcase_classes = [
         TestCoreWorkspace,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
-    print('')
-    print('SUCCEED: {}'.format(__file__))
-    print('')
-    print('')
+
+
+if __name__ == '__main__':
+    run()

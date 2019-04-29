@@ -1,20 +1,19 @@
-import subprocess
-import os
+import sys
 from pathlib2 import Path
 
-if os.name == 'posix':
-    PYTHON3_PATH = '/usr/bin/python3'
-    PYTHON2_PATH = '/usr/bin/python2'
-elif os.name == 'nt':
-    PYTHON3_PATH = r'C:\Python3.7.0\python.exe'
-    PYTHON2_PATH = r'C:\Python2.7.11\python.exe'
+if __name__ == '__main__':
+    TESTCASE_DIR = Path(__file__).resolve().parent.joinpath('testcase')
+    sys.path.append(str(TESTCASE_DIR))
 
-TESTCASE_DIR = Path(__file__).parent.joinpath('testcase')
-
-for p in TESTCASE_DIR.iterdir():
-    if p.name.startswith('test') and p.name.endswith('.py'):
-        subprocess.call([PYTHON3_PATH, str(p)])
-
-for p in TESTCASE_DIR.iterdir():
-    if p.name.startswith('test') and p.name.endswith('.py'):
-        subprocess.call([PYTHON2_PATH, str(p)])
+    for p in TESTCASE_DIR.iterdir():
+        if p.name.startswith('test') and p.name.endswith('.py'):
+            if sys.version_info[0] == 3:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(p.name, str(p))
+                testcase = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(testcase)
+                testcase.run()
+            else:
+                import imp
+                testcase = imp.load_source(p.name, str(p))
+                testcase.run()

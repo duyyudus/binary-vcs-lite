@@ -6,7 +6,7 @@ from pprint import pprint
 from pathlib2 import Path
 
 # Append parent directory of `binary_vcs_lite` package
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from binary_vcs_lite.common import (
     config,
@@ -26,7 +26,7 @@ from binary_vcs_lite.core import (
 
 from binary_vcs_lite import vcs_interface
 
-TEST_ROOT = Path(__file__).parent.parent
+TEST_ROOT = Path(__file__).resolve().parent.parent
 TEST_SAMPLE_DATA_WORKSPACE_DIR = str(TEST_ROOT.joinpath('sample_data', 'last'))
 TEST_OUTPUT_DATA = str(TEST_ROOT.joinpath('output_data'))
 TEST_OUTPUT_DATA_WORKSPACE_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
@@ -52,5 +52,40 @@ def cleanup_workspace_dir():
         if not p.name == config.CFG_DICT['VCS_FOLDER']:
             shutil.rmtree(str(p))
 
+
+def start_log_test(testcase_path):
+    message = '[START TEST] :: {}'.format(testcase_path)
+    exe = 'Python interpreter: {}'.format(sys.executable)
+    print('')
+    print('#' * len(message))
+    print('#' * len(message))
+    print(message)
+    print(exe)
+    print('')
+
+
+def end_log_test(testcase_path):
+    message = '[END TEST] :: {}'.format(testcase_path)
+    exe = 'Python interpreter: {}'.format(sys.executable)
+    print('')
+    print(exe)
+    print(message)
+    print('#' * len(message))
+    print('#' * len(message))
+    print('')
+
+
+def log_test(testcase_path):
+    def _log_test(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            switch_log_vcs(0)
+            start_log_test(testcase_path)
+            func(*args, **kwargs)
+            end_log_test(testcase_path)
+        return wrapper
+    return _log_test
+
+
 if __name__ == '__main__':
-    create_workspace_dir()
+    pass

@@ -13,7 +13,7 @@ class TestCoreBlob(unittest.TestCase):
         cleanup_output_data()
 
     def test_store_blob(self):
-        print()
+        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
@@ -23,7 +23,7 @@ class TestCoreBlob(unittest.TestCase):
             self.assertTrue(Path(p).exists())
 
     def test_extract_blob(self):
-        print()
+        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
@@ -35,14 +35,16 @@ class TestCoreBlob(unittest.TestCase):
         for p in results:
             self.assertTrue(Path(p).exists())
 
-if __name__ == '__main__':
+
+@log_test(__file__)
+def run():
     testcase_classes = [
         TestCoreBlob,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
-    print('')
-    print('SUCCEED: {}'.format(__file__))
-    print('')
-    print('')
+
+
+if __name__ == '__main__':
+    run()

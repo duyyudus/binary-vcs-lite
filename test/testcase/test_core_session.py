@@ -13,14 +13,15 @@ class TestCoreSession(unittest.TestCase):
         cleanup_output_data()
 
 
-if __name__ == '__main__':
+@log_test(__file__)
+def run():
     testcase_classes = [
         TestCoreSession,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
-    print('')
-    print('SUCCEED: {}'.format(__file__))
-    print('')
-    print('')
+
+
+if __name__ == '__main__':
+    run()

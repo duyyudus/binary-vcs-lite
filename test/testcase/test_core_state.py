@@ -13,7 +13,7 @@ class TestCoreState(unittest.TestCase):
         cleanup_output_data()
 
     def test_state_node(self):
-        print()
+        log_info()
         last = state.Node('last')
         med_res = state.Node('medRes', None, last, verbose=1)
         med_asset = state.Node('asset.ma', 'med_asset_hash', med_res, verbose=1)
@@ -49,14 +49,15 @@ class TestCoreState(unittest.TestCase):
         self.assertEqual(med_res.child_count, 2)
 
 
-if __name__ == '__main__':
+@log_test(__file__)
+def run():
     testcase_classes = [
         TestCoreState,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
-    print('')
-    print('SUCCEED: {}'.format(__file__))
-    print('')
-    print('')
+
+
+if __name__ == '__main__':
+    run()
