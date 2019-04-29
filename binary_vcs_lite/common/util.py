@@ -15,7 +15,8 @@ REPO = CFG_DICT['REPO']
 WORKSPACE = CFG_DICT['WORKSPACE']
 
 LOG_PREFIX = CFG_DICT['LOG_PREFIX']
-_LOG_ON = 1
+LOG_ERROR_PREFIX = CFG_DICT['LOG_ERROR_PREFIX']
+_log_on = 1
 
 
 def _time_measure(func):
@@ -30,21 +31,42 @@ def _time_measure(func):
     return wrapper
 
 
-def log_info(*args):
-    if not _LOG_ON:
-        return 0
+def _log_message(args):
     _log_indent = 0
     message = ''.join([str(a) for a in args])
+    return (''.join([' ' for i in range(_log_indent * 4)]), message)
+
+
+def log_info(*args):
+    if not _log_on:
+        return 0
+    indent_str, message = _log_message(args)
     if not message:
         print('')
         return 0
-    indent_str = ''.join([' ' for i in range(_log_indent * 4)])
-    print('[{}] :: {}'.format(LOG_PREFIX, indent_str + message))
+    print('{} :: {}'.format(
+        LOG_PREFIX,
+        indent_str + message
+    ))
+
+
+def log_error(*args):
+    if not _log_on:
+        return 0
+    indent_str, message = _log_message(args)
+    if not message:
+        print('')
+        return 0
+    print('{} {} :: {}'.format(
+        LOG_PREFIX,
+        LOG_ERROR_PREFIX,
+        indent_str + message
+    ))
 
 
 def switch_log_vcs(is_on):
-    global _LOG_ON
-    _LOG_ON = is_on
+    global _log_on
+    _log_on = is_on
 
 
 def match_regex_pattern(input_str, patterns):

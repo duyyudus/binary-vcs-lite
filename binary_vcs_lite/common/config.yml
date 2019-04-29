@@ -16,7 +16,8 @@ WORKSPACE:
   RELATIVE_PATH_KEY: 'relative_path'
   ABSOLUTE_PATH_KEY: 'absolute_path'
 
-LOG_PREFIX: 'VCS-Lite'
+LOG_PREFIX: '[VCS-Lite]'
+LOG_ERROR_PREFIX: '[Error]'
 
 INCLUDE_PATTERN:
   - '**/*'
