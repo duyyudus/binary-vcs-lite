@@ -43,9 +43,7 @@ def match_regex_pattern(input_str, patterns):
 
 
 def copy_file(source, target, overwrite=0, verbose=0):
-    """
-    `source` and `target` will be converted to `str`
-    """
+    """`source` and `target` will be converted to `str`."""
 
     source = str(source)
     target = str(target)
@@ -63,15 +61,11 @@ def copy_file(source, target, overwrite=0, verbose=0):
 
 def batch_copy(path_pair, overwrite=0, verbose=0):
     """
-    Params
-    ------
-    path_pair : list
-        List of 2-tuple of str, [(source, target),...]
+    Args:
+        path_pair (list of 2-tuple): List of 2-tuple of str, [(source, target),...]
 
-    Returns
-    -------
-    list of str
-        List of copied files
+    Returns:
+        list of str: List of copied files
     """
 
     copied = []
@@ -84,9 +78,8 @@ def batch_copy(path_pair, overwrite=0, verbose=0):
 
 def load_json(json_path, verbose=0):
     """
-    Params
-    ------
-    json_path : str or Path
+    Args:
+        json_path (str or Path):
 
     """
 
@@ -104,9 +97,8 @@ def load_json(json_path, verbose=0):
 
 def save_json(data, json_path, verbose=0):
     """
-    Params
-    ------
-    json_path : str or Path
+    Args:
+        json_path (str or Path):
 
     """
 

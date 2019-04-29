@@ -3,35 +3,32 @@ from binary_vcs_lite.common import hashing
 
 
 class Workspace(object):
-    """
-    Manage working directory.
+    """Manage working directory.
 
     Controls which files to track 
     and handle workspace-related operations
 
     It must connect to a `core.repo.Repo`
 
-    Internal attributes
-        _workspace_dir : Path
-        _deep_dir : Path
-        _metadata_path : Path
-        _current_state : str
+    Attributes:
+        _workspace_dir (Path):
+        _deep_dir (Path):
+        _metadata_path (Path):
+        _current_state (str):
 
-    Exposed properties
-        deep_dir : Path
-        workspace_dir : Path
-        workspace_hash : str
-        current_state : str
+    Properties:
+        deep_dir (Path):
+        workspace_dir (Path):
+        workspace_hash (common.hashing.WorkspaceHash):
+        current_state (str):
 
     """
 
     def __init__(self, workspace_dir, repo, init=0):
         """
-        Params
-        ------
-        workspace_dir : str or Path
-            Any folder with sub-hierarchy `VCS_FOLDER/WORKSPACE_FOLDER`
-        repo : core.repo.Repo
+        Args:
+            workspace_dir (str or Path): Any folder with sub-hierarchy `VCS_FOLDER/WORKSPACE_FOLDER`
+            repo (core.repo.Repo)
 
         """
 
@@ -50,22 +47,22 @@ class Workspace(object):
 
     @property
     def deep_dir(self):
-        """Safe way to get `self._deep_dir` value without accidentally re-assign it."""
-
+        """Path: """
         return self._deep_dir
 
     @property
     def workspace_dir(self):
-        """Safe way to get `self._workspace_dir` value without accidentally re-assign it."""
-
+        """Path: """
         return self._workspace_dir
 
     @property
     def workspace_hash(self):
+        """common.hashing.WorkspaceHash: """
         return hashing.hash_workspace(self._workspace_dir)
 
     @property
     def current_state(self):
+        """str: """
         return self._current_state
 
     def _init_deep_dir(self):
@@ -117,8 +114,6 @@ class Workspace(object):
         self._current_state = current_state
 
     def absolute_path(self, relative_path):
-        """
-        Join relative path and working dir
-        """
+        """Join relative path and working dir."""
 
         return Path(self._workspace_dir, relative_path)

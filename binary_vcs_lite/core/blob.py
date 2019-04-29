@@ -2,29 +2,28 @@ from binary_vcs_lite.common.util import *
 
 
 class Blob(object):
-    """
-    Manage data blob.
+    """Manage data blob.
 
-    Blob does not care about anything except following info        
-        blob_dir: str or Path
-        workspace_hash: common.hashing.WorkspaceHash
+    Blob does not care about anything except following info::
+
+        blob_dir (str or Path):
+        workspace_hash (common.hashing.WorkspaceHash):
 
     These data are processed and given to Blob by Workspace and Repo
 
-    Internal attributes
-        _blob_dir : Path
+    Attributes:
+        _blob_dir (Path):
 
-    Exposed properties
-        blob_dir : Path
+    Properties:
+        blob_dir (Path):
 
     """
 
     def __init__(self, blob_dir):
         """
-        Params
-        ------
-        blob_dir : str or Path
-            A folder store blob data
+        Args:
+            blob_dir (str or Path): A folder store blob data
+
         """
 
         super(Blob, self).__init__()
@@ -32,29 +31,27 @@ class Blob(object):
 
     @property
     def blob_dir(self):
-        """Safe way to get `self._blob_dir` value without accidentally re-assign it."""
-
+        """Path: """
         return self._blob_dir
 
     def _parse_hash(self, hash_value):
-        """
-        Parse blob sub folder and blob file name from hash
+        """Parse blob sub folder and blob file name from hash.
 
-        Returns
-        -------
-        2-tuple
-            (sub_folder_name, blob_file_name)
+        Args:
+            hash_value (str): 40-char string digest
+
+        Returns:
+            2-tuple: (sub_folder_name, blob_file_name)
+
         """
 
         return (hash_value[:2], hash_value[2:])
 
     def store_blob(self, workspace_hash, verbose=0):
-        """
-        Put files in working dir to blob
+        """Put files in working dir to blob.
 
-        Params
-        ------
-        workspace_hash : common.hashing.WorkspaceHash
+        Args:
+            workspace_hash (common.hashing.WorkspaceHash):
 
         """
 
@@ -79,12 +76,10 @@ class Blob(object):
         return copied
 
     def extract_blob(self, workspace_hash, verbose=0):
-        """
-        Extract files from blob to working dir
+        """Extract files from blob to working dir.
 
-        Params
-        ------
-        workspace_hash : common.hashing.WorkspaceHash
+        Args:
+            workspace_hash (common.hashing.WorkspaceHash):
 
         """
 

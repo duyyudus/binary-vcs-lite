@@ -4,38 +4,37 @@ from binary_vcs_lite.core import blob, state, session
 
 
 class Repo(object):
-    """
-    Manage version control system repository.
+    """Manage version control system repository.
 
-    Controls components
+    Controls components::
+
         `core.blob.Blob`
         `core.state.StateChain`
         `core.session.Session`
 
-    Internal attributes
-        _repo_dir : Path
-        _deep_dir : Path
-        _repo_id : Path
-        _blob_dir : Path
-        _state_dir : Path
-        _session_dir : Path
-        _blob : core.blob.Blob
-        _state_chain : core.state.StateChain
-        _session : core.session.Session
+    Attributes:
+        _repo_dir (Path):
+        _deep_dir (Path):
+        _repo_id (Path):
+        _blob_dir (Path):
+        _state_dir (Path):
+        _session_dir (Path):
+        _blob (core.blob.Blob):
+        _state_chain (core.state.StateChain):
+        _session (core.session.Session):
 
-    Exposed properties
-        deep_dir : Path
-        repo_dir : Path
-        repo_id : str
-        latest_state : str
+    Properties:
+        deep_dir (Path):
+        repo_dir (Path):
+        repo_id (str):
+        latest_state (str):
 
     """
 
     def __init__(self, repo_dir, init=0):
         """
-        Params
-        ------
-        repo_dir : str or Path
+        Args:
+            repo_dir (str or Path):
 
         """
 
@@ -59,24 +58,22 @@ class Repo(object):
 
     @property
     def deep_dir(self):
-        """Safe way to get `self._deep_dir` value without accidentally re-assign it."""
-
+        """Path: """
         return self._deep_dir
 
     @property
     def repo_dir(self):
-        """Safe way to get `self._repo_dir` value without accidentally re-assign it."""
-
+        """Path: """
         return self._repo_dir
 
     @property
     def repo_id(self):
-        """Safe way to get `self._repo_id` value without accidentally re-assign it."""
-
+        """str: """
         return self._repo_id
 
     @property
     def latest_state(self):
+        """str: """
         return self._state_chain.latest_state
 
     def _init_deep_dir(self):
@@ -87,24 +84,20 @@ class Repo(object):
         return hashing.hash_str(self._deep_dir.as_posix())
 
     def store_blob(self, workspace_hash):
-        """
-        Interface to Blob.store_blob()
+        """Interface to Blob.store_blob()
 
-        Params
-        ------
-        workspace_hash : common.hashing.WorkspaceHash
+        Args:
+            workspace_hash (common.hashing.WorkspaceHash):
 
         """
 
         return self._blob.store_blob(workspace_hash)
 
     def extract_blob(self, workspace_hash):
-        """
-        Interface to Blob.extract_blob()
+        """Interface to Blob.extract_blob()
 
-        Params
-        ------
-        workspace_hash : common.hashing.WorkspaceHash
+        Args:
+            workspace_hash (common.hashing.WorkspaceHash):
 
         """
 

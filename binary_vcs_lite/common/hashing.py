@@ -1,23 +1,21 @@
 import hashlib
-from pathlib2 import Path
-from . import util
-from . import config
+from .util import *
 
 
 class WorkspaceHash(dict):
     """
-    A dict with structure
-    {
-        file_id: {
-            "hash": sha1_digest,
-            "relative_path": str,
-            "absolute_path": str
-        },
-        ...
-    }
+    A dict with structure::
 
-    `file_id` is just `relative_path` in POSIX format
-    `absolute_path` depend on workspace location
+        {
+            file_id: {
+                "hash": sha1_digest,
+                "relative_path": str,
+                "absolute_path": str
+            },            
+        }
+
+        `file_id` is just `relative_path` in POSIX format
+        `absolute_path` depend on workspace location
 
     """
 
@@ -50,26 +48,22 @@ def hash_str(input_str):
     return sha.hexdigest()
 
 
-# @util._time_measure
+# @_time_measure
 def hash_workspace(workspace_dir,
                    include_pattern=config.CFG_DICT['INCLUDE_PATTERN'],
                    exclude_pattern=config.CFG_DICT['EXCLUDE_PATTERN'],
                    verbose=0):
-    """
-    Params
-    ------
-    workspace_dir : str
-        Path to working directory
-    include_pattern : list of str
-        Glob pattern for globbing files in `workspace_dir`
-        Must be defined relatively from `workspace_dir`
-    exclude_pattern : list of str
-        Regex pattern for filtering out files in `workspace_dir`
-        It will override `include_pattern`
+    """Scan input working directory and return `WorkspaceHash` data.
 
-    Returns
-    -------
-    common.hashing.WorkspaceHash
+    Args:
+        workspace_dir (str or Path): Path to working directory
+        include_pattern (list of str): Glob pattern for globbing files in `workspace_dir`
+            Must be defined relatively from `workspace_dir`
+        exclude_pattern (list of str): Regex pattern for filtering out files in `workspace_dir`
+            It will override `include_pattern`
+
+    Returns:
+        common.hashing.WorkspaceHash:
 
     """
 
@@ -86,7 +80,7 @@ def hash_workspace(workspace_dir,
     if verbose:
         print('Hash digest info:')
     for p in all_paths:
-        if util.match_regex_pattern(str(p), exclude_pattern):
+        if match_regex_pattern(str(p), exclude_pattern):
             continue
         try:
             rel_path = p.relative_to(workspace_dir)

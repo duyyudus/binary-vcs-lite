@@ -22,35 +22,31 @@ class InvalidNode(Exception):
 
 
 class Node(object):
-    """
-    Represent for a file/folder
+    """Represent for a file/folder.
 
-    Internal attributes
-        _node_name : str
-        _file_hash : str
-        _parent : core.state.Node
-        _childs : list of core.state.Node
-            Not exists if Node is file
+    Attributes:
+        _node_name (str):
+        _file_hash (str):
+        _parent (core.state.Node):
+        _childs (list of core.state.Node): Not exists if Node is file
 
-    Exposed properties
-        node_name : str
-        node_path : Path
-        file_hash : str
-        parent : core.state.Node
-        childs : list of core.state.Node
-        is_file : bool
-        child_count : int
+    Properties:
+        node_name (str):
+        node_path (Path):
+        file_hash (str):
+        parent (core.state.Node):
+        childs (list of core.state.Node):
+        is_file (bool):
+        child_count (int):
 
     """
 
     def __init__(self, node_name, file_hash=None, parent=None, verbose=0):
         """
-        Params
-        ------
-        node_name : str
-        file_hash : str
-            Set to None make it a folder node
-        parent : core.state.Node
+        Args:
+            node_name (str):
+            file_hash (str): Set to None make it a folder node
+            parent (core.state.Node):
 
         """
 
@@ -67,30 +63,37 @@ class Node(object):
 
     @property
     def node_name(self):
+        """str: """
         return self._node_name
 
     @property
     def file_hash(self):
+        """str: """
         return self._file_hash
 
     @property
     def parent(self):
+        """core.state.Node: """
         return self._parent
 
     @property
     def childs(self):
+        """list of core.state.Node: """
         return [] if self.is_file else self._childs
 
     @property
     def is_file(self):
+        """bool: """
         return 1 if self._file_hash else 0
 
     @property
     def child_count(self):
+        """int: """
         return len(self._childs) if not self.is_file else None
 
     @property
     def node_path(self):
+        """Path: """
         cur_parent = self._parent
         parts = [self._node_name]
         while cur_parent:
@@ -154,20 +157,19 @@ class StateTree(object):
     A tree of Node objects.
 
     Internal attributes
-        _tree_name : str
-        _root : core.state.Node
+        _tree_name (str):
+        _root (core.state.Node):
 
     Exposed properties
-        tree_name : str
-        root : core.state.Node
+        tree_name (str):
+        root (core.state.Node):
 
     """
 
     def __init__(self, tree_name):
         """
-        Params
-        ------
-        tree_name : str
+        Args:
+            tree_name (str):
 
         """
 
@@ -177,11 +179,20 @@ class StateTree(object):
 
     @property
     def tree_name(self):
+        """str: """
         return self._tree_name
 
     @property
     def root(self):
+        """core.state.Node: """
         return self._root
+
+    def add_sub_tree(self, sub_path):
+        """
+        Args:
+            sub_path (str): path of sub tree to be appended under `self._root`
+        """
+        pass
 
 
 class State(object):
@@ -189,10 +200,8 @@ class State(object):
 
     def __init__(self, state_file):
         """
-        Params
-        ------
-        state_file : str or Path
-            JSON file which store state data
+        Args:
+            state_file (str or Path): JSON file which store state data
 
         """
 
@@ -201,9 +210,8 @@ class State(object):
 
     def from_workspace_hash(self, workspace_hash):
         """
-        Params
-        ------
-        workspace_hash : common.hashing.WorkspaceHash
+        Args:
+            workspace_hash (common.hashing.WorkspaceHash):
 
         """
 
@@ -218,10 +226,8 @@ class StateChain(object):
 
     def __init__(self, state_dir):
         """
-        Params
-        ------
-        state_dir : str or Path
-            A folder store state data
+        Args:
+            state_dir (str or Path): A folder store state data
         """
 
         super(StateChain, self).__init__()
@@ -229,10 +235,10 @@ class StateChain(object):
 
     @property
     def state_dir(self):
-        """Safe way to get `self._state_dir` value without accidentally re-assign it."""
-
+        """Path: """
         return self._state_dir
 
     @property
     def latest_state(self):
+        """str: """
         return '0x00000000000000000000000000000000000000'
