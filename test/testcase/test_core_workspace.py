@@ -1,4 +1,4 @@
-from setup_test import *
+from _setup_test import *
 
 
 class TestCoreWorkspace(unittest.TestCase):
@@ -29,3 +29,7 @@ if __name__ == '__main__':
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
+    print('')
+    print('SUCCEED: {}'.format(__file__))
+    print('')
+    print('')

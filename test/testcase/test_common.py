@@ -1,4 +1,4 @@
-from setup_test import *
+from _setup_test import *
 
 
 class TestHashing(unittest.TestCase):
@@ -35,8 +35,7 @@ class TestHashing(unittest.TestCase):
     def test_hash_to_path(self):
         print()
         workspace_hash = self.test_hash_workspace_dir()
-        for v in workspace_hash.values():
-            print(v)
+        for v in workspace_hash.values():            
             relative_path = workspace_hash.hash_to_path(v['hash'])
             self.assertEqual(relative_path, v['relative_path'])
 
@@ -86,3 +85,7 @@ if __name__ == '__main__':
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)
         unittest.TextTestRunner(verbosity=2).run(testcase)
+    print('')
+    print('SUCCEED: {}'.format(__file__))
+    print('')
+    print('')

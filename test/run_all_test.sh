@@ -1,0 +1,1 @@
+python3 run_all_test.py

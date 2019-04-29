@@ -4,17 +4,19 @@ import shutil
 import unittest
 from pprint import pprint
 from pathlib2 import Path
-sys.path.append(str(Path(__file__).parent.parent))
 
-from common import (
+# Append parent directory of `binary_vcs_lite` package
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from binary_vcs_lite.common import (
     config,
     util,
     hashing
 )
 
-from common.util import *
+from binary_vcs_lite.common.util import *
 
-from core import (
+from binary_vcs_lite.core import (
     repo,
     workspace,
     state,
@@ -22,11 +24,11 @@ from core import (
     session
 )
 
-import vcs_interface
+from binary_vcs_lite import vcs_interface
 
-
-TEST_SAMPLE_DATA_WORKSPACE_DIR = str(Path(__file__).parent.joinpath('sample_data', 'last'))
-TEST_OUTPUT_DATA = str(Path(__file__).parent.joinpath('output_data'))
+TEST_ROOT = Path(__file__).parent.parent
+TEST_SAMPLE_DATA_WORKSPACE_DIR = str(TEST_ROOT.joinpath('sample_data', 'last'))
+TEST_OUTPUT_DATA = str(TEST_ROOT.joinpath('output_data'))
 TEST_OUTPUT_DATA_WORKSPACE_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
 TEST_OUTPUT_DATA_REMOTE_WORKSPACE_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('remote_last'))
 

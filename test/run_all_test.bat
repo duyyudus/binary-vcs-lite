@@ -1,0 +1,1 @@
+C:\Python3.7.0\python.exe run_all_test.py
