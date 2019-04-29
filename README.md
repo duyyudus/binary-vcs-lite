@@ -1,8 +1,10 @@
 # binary-vcs-lite
 
-Minimalism version control system for binary data. 
+Minimalism version control system for binary data.
 
-Should work best for graphic data ( model, texture, geometry cache...) as well as non-text files.
+It is designed for versioning asset data in game/3D/VFX industry, in a simple way.
+
+Hopefully, it can make life easier for TA/TD, without using huge version control system like  Perforce.
 
 ## Target features
 
@@ -30,7 +32,7 @@ Work on top of `StateChain`, provide a filter-like mechanism to derive a discont
 
 ### Commit modes
 
-*Managed by `core.workspace.Workspace`*
+*Managed by `core.repo.Repo` using `core.state.State` and `core.state.StateChain`*
 
 * `EXHAUSTIVE` ( commit all diff types )
 
@@ -38,9 +40,9 @@ Work on top of `StateChain`, provide a filter-like mechanism to derive a discont
 
 New `State` to be added to `StateChain` is derived differently from `WorkspaceHash` depend on commit modes
 
-* In detail, `Workspace` interprets `WorkspaceHash` in `EXHAUSTIVE` or `ADDITIVE` mode, then create a new `State` from interpreted data, and give it to `StateChain`
+* In detail, `StateChain` interprets `WorkspaceHash` in `EXHAUSTIVE` or `ADDITIVE` mode, then create a new `State` from interpreted data
 
-Real `State` diff calculation process is always exhaustive
+Diff calculation process between two `State` objects is always exhaustive
 
 ## Main concepts
 
