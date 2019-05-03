@@ -11,7 +11,7 @@ class WorkspaceHash(dict):
                 hash_key: sha1_digest,
                 relative_path_key: str,
                 absolute_path_key: str
-            },            
+            },
         }
 
         Key-value of `file_id` is paired-value of `relative_path_key` in POSIX format
@@ -92,7 +92,8 @@ def hash_workspace(workspace_dir,
                 WORKSPACE['RELATIVE_PATH_KEY']: str(rel_path),
                 WORKSPACE['ABSOLUTE_PATH_KEY']: str(p)
             }
-        except:
+        except Exception as e:
             if verbose:
                 log_info('Skipped: {}'.format(str(p)))
+                log_info('----Error: {}'.format(e))
     return workspace_hash

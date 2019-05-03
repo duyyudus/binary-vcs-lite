@@ -1,11 +1,17 @@
 import os
+import sys
 import functools
 import time
 import json
 import re
 import shutil
-from pathlib2 import Path
-from pprint import pprint
+
+if sys.version_info[0] == 3:
+    from pathlib import Path, PurePath
+else:
+    from pathlib2 import Path, PurePath
+from pprint import pformat
+
 from . import config
 
 CFG_DICT = config.CFG_DICT
@@ -17,6 +23,22 @@ WORKSPACE = CFG_DICT['WORKSPACE']
 LOG_PREFIX = CFG_DICT['LOG_PREFIX']
 LOG_ERROR_PREFIX = CFG_DICT['LOG_ERROR_PREFIX']
 _log_on = 1
+
+
+class VcsLiteError(Exception):
+    """Base error for version control operations."""
+
+    def __init__(self, message):
+        super(VcsLiteError, self).__init__()
+        self._message = message
+        log_error('{}'.format(message))
+
+    def __str__(self):
+        return self._message
+
+
+class InvalidType(VcsLiteError):
+    """Invalid type."""
 
 
 def _time_measure(func):
@@ -32,8 +54,14 @@ def _time_measure(func):
 
 
 def _log_message(args):
+    def fstr(s):
+        if type(s) is str:
+            return s
+        else:
+            return '\n' + pformat(s)
+
     _log_indent = 0
-    message = ''.join([str(a) for a in args])
+    message = ''.join([fstr(a) for a in args])
     return (''.join([' ' for i in range(_log_indent * 4)]), message)
 
 
@@ -141,3 +169,22 @@ def save_json(data, json_path, verbose=0):
         f.write(json.dumps(data))
         if verbose:
             log_info('Saved JSON: {}'.format(json_path))
+
+
+def check_type(obj, types, raise_exception=1):
+    """Assert type of `obj`
+
+    Args:
+        obj:
+        types (list): list of types/classes
+    Raises:
+        InvalidType:
+    """
+
+    if isinstance(obj, tuple(types)):
+        return 1
+    elif raise_exception:
+        msg = '"{}" must be an instance of ({})'.format(str(obj), ', '.join([str(t) for t in types]))
+        raise InvalidType(msg)
+    else:
+        return 0

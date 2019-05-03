@@ -5,8 +5,13 @@ import unittest
 from pprint import pprint
 from pathlib2 import Path
 
+_cur_file = Path(__file__).resolve()
 # Append parent directory of `binary_vcs_lite` package
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+sys.path.append(str(_cur_file.parent.parent.parent))
+
+# Append parent directory of `tree_util_lite` package
+# There must be a Git repo `tree-util-lite` in the same folder with `binary-vcs-lite` repo
+sys.path.append(str(_cur_file.parent.parent.parent.parent.joinpath('tree-util-lite')))
 
 from binary_vcs_lite.common import (
     config,

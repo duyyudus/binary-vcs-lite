@@ -5,7 +5,7 @@ from binary_vcs_lite.common import hashing
 class Workspace(object):
     """Manage working directory.
 
-    Controls which files to track 
+    Controls which files to track
     and handle workspace-related operations
 
     It must connect to a `core.repo.Repo`
