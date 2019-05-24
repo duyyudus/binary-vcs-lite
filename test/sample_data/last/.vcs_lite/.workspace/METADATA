@@ -1,12 +1,14 @@
 {
-	"repo_record": {
-		"repo_id_1": {
-			"path": "path/to/repo1",
-			"current_state": "state_id"
-		},
-		"repo_id_2": {
-			"path": "path/to/repo2",
-			"current_state": "state_id"
-		}
-	}
+    "repo_record": {
+        "username1_20191212_090000": {
+            "path": "path/to/repo1",
+            "session_id": "review",
+            "revision": 2
+        },
+        "username2_20191212_183000": {
+            "path": "path/to/repo2",
+            "session_id": "wip",
+            "revision": 5
+        }
+    }
 }

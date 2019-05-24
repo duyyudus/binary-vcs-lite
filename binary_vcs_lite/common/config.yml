@@ -3,8 +3,8 @@ VCS_FOLDER: &vcs_folder '.vcs_lite'
 REPO:
   REPO_FOLDER: '.repo'
   BLOB_FOLDER: 'blob'
-  SESSION_FOLDER: 'sessions'
-  STATE_FOLDER: 'states'
+  SESSION_FOLDER: 'session'
+  STATE_FOLDER: 'state'
 
 WORKSPACE:
   WORKSPACE_FOLDER: '.workspace'
