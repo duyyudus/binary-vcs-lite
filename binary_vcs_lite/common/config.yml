@@ -1,17 +1,38 @@
 VCS_FOLDER: &vcs_folder '.vcs_lite'
 
 REPO:
-  REPO_FOLDER: '.repo'
-  BLOB_FOLDER: 'blob'
-  SESSION_FOLDER: 'session'
-  STATE_FOLDER: 'state'
+  FOLDER: '.repo'
+  METADATA:
+    FILE: 'METADATA'
+    REPO_ID_KEY: 'repo_id'
+
+BLOB:
+  FOLDER: 'blob'
+
+SESSION:
+  FOLDER: 'session'
+  CONTENT:
+    REVISION_KEY: 'revision'
+    DETAIL_VERSION_KEY: 'detail_version'
+
+STATE:
+  FOLDER: 'state'
+  CONTENT:
+    FILE_KEY: 'file'
+    TIMESTAMP_KEY: 'timestamp'
+    SESSION_LIST_KEY: 'session_list'
+    DATA_KEY: 'data'
 
 WORKSPACE:
-  WORKSPACE_FOLDER: '.workspace'
-  METADATA_FILE: 'METADATA'
-  REPO_RECORD_KEY: 'repo_record'
-  PATH_KEY: 'path'
-  CURRENT_STATE_KEY: 'current_state'
+  FOLDER: '.workspace'
+  METADATA:
+    FILE: 'METADATA'
+    REPO_RECORD_KEY: 'repo_record'
+    PATH_KEY: 'path'
+    SESSION_ID_KEY: 'session_id'
+    REVISION_KEY: 'revision'
+
+WORKSPACE_HASH:
   HASH_KEY: 'hash'
   RELATIVE_PATH_KEY: 'relative_path'
   ABSOLUTE_PATH_KEY: 'absolute_path'
@@ -19,8 +40,8 @@ WORKSPACE:
 LOG_PREFIX: '[VCS-Lite]'
 LOG_ERROR_PREFIX: '[Error]'
 
-INCLUDE_PATTERN:
-  - '**/*'
-
-EXCLUDE_PATTERN: 
-  - *vcs_folder
+DEFAULT_FILE_PATTERN:
+  INCLUDE:
+    - '**/*'
+  EXCLUDE:
+    - *vcs_folder

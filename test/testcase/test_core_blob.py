@@ -16,7 +16,7 @@ class TestBlob(unittest.TestCase):
         log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
-            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
+            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
         )
         results = b.store_blob(workspace_hash, verbose=1)
 
@@ -28,7 +28,7 @@ class TestBlob(unittest.TestCase):
         log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
-            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
+            blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
         )
         b.store_blob(workspace_hash)
         cleanup_workspace_dir()

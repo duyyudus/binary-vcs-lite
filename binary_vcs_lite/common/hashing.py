@@ -2,11 +2,6 @@ import hashlib
 from .util import *
 from .config import *
 
-DEFAULT_FILE_PATTERN = {
-    'include': CFG_DICT['INCLUDE_PATTERN'],
-    'exclude': CFG_DICT['EXCLUDE_PATTERN']
-}
-
 
 class WorkspaceHash(dict):
     """An instance of this class represent for a specific workspace,
@@ -49,8 +44,8 @@ class WorkspaceHash(dict):
         """
         self._workspace_dir = target_dir
         for f in self:
-            abs_path = Path(self._workspace_dir, self[f][WORKSPACE['RELATIVE_PATH_KEY']])
-            self[f][WORKSPACE['ABSOLUTE_PATH_KEY']] = abs_path.as_posix()
+            abs_path = Path(self._workspace_dir, self[f][WORKSPACE_HASH['RELATIVE_PATH_KEY']])
+            self[f][WORKSPACE_HASH['ABSOLUTE_PATH_KEY']] = abs_path.as_posix()
 
     def hash_to_path(self, hash_value):
         """
@@ -61,8 +56,8 @@ class WorkspaceHash(dict):
             str:
         """
         for file_id in self:
-            if hash_value == self[file_id][WORKSPACE['HASH_KEY']]:
-                return self[file_id][WORKSPACE['RELATIVE_PATH_KEY']]
+            if hash_value == self[file_id][WORKSPACE_HASH['HASH_KEY']]:
+                return self[file_id][WORKSPACE_HASH['RELATIVE_PATH_KEY']]
 
 
 def _hash_sha(filepath, buff_size=65536):
@@ -106,8 +101,8 @@ def hash_workspace(workspace_dir,
     """
 
     # Need this in case None is passed into pattern value
-    include_pattern = file_pattern['include'] if file_pattern else DEFAULT_FILE_PATTERN['include']
-    exclude_pattern = file_pattern['exclude'] if file_pattern else DEFAULT_FILE_PATTERN['exclude']
+    include_pattern = file_pattern['INCLUDE'] if file_pattern else DEFAULT_FILE_PATTERN['INCLUDE']
+    exclude_pattern = file_pattern['EXCLUDE'] if file_pattern else DEFAULT_FILE_PATTERN['EXCLUDE']
 
     workspace_dir = Path(workspace_dir)
     workspace_hash = WorkspaceHash(workspace_dir)
@@ -126,8 +121,8 @@ def hash_workspace(workspace_dir,
             if verbose:
                 log_info('{}: {}'.format(str(p), hash_data))
             workspace_hash[rel_path.as_posix()] = {
-                WORKSPACE['HASH_KEY']: hash_data,
-                WORKSPACE['RELATIVE_PATH_KEY']: str(rel_path)
+                WORKSPACE_HASH['HASH_KEY']: hash_data,
+                WORKSPACE_HASH['RELATIVE_PATH_KEY']: str(rel_path)
             }
         except Exception as e:
             if verbose:

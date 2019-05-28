@@ -23,10 +23,12 @@ from binary_vcs_lite.common import (
 )
 
 from binary_vcs_lite.core import (
-    repo,
     workspace,
-    state,
+    repo,
     blob,
+    state_chain,
+    state,
+    session_manager,
     session
 )
 
