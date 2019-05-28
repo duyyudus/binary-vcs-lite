@@ -1,15 +1,15 @@
 {
 	"file": [
-		"relative/path/to/file1/_dx_<file1_hash>",
-		"relative/path/to/file2/_dx_<file2_hash>",
-		"relative/path/to/file3/_dx_<file3_hash>"
+		"relative/path/to/file1/_dx_file100000000000000000000000000000000000",
+		"relative/path/to/file2/_dx_file200000000000000000000000000000000000",
+		"relative/path/to/file3/_dx_file300000000000000000000000000000000000"
 	],
-	"timestamp": 1234567,
+	"timestamp": 1000000001,
 	"session_list": [
-		"review",
-		"publish"
+		"review"
 	],
 	"data": {
+		"message": 'this is the first state',
 		"message_tag": {}
 	}
 }

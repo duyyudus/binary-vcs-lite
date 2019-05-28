@@ -38,6 +38,13 @@ class State(object):
         previous (State):
         next (State):
 
+    Methods:
+        set_previous(state)
+        set_next(state)
+        update(workspace_hash, session_list, data)
+        save()
+        load()
+
     """
 
     def __init__(self, state_file):
@@ -82,17 +89,17 @@ class State(object):
     def next(self):
         return self._next
 
-    def set_previous(self, state):
+    def set_previous(self, target_state):
         """
         Args:
-            state (State):
+            target_state (State):
         """
         pass
 
-    def set_next(self, state):
+    def set_next(self, target_state):
         """
         Args:
-            state (State):
+            target_state (State):
         """
         pass
 
