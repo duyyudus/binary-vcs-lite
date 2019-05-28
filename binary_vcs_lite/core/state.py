@@ -2,79 +2,111 @@ from binary_vcs_lite.common.util import *
 from tree_util_lite.core.tree import Tree
 
 
-class IsNotFolder(VcsLiteError):
-    """Raise in case operation run in a non-folder Node."""
-
-
 class StateTree(Tree):
-    """
-    A tree represent for file hierarchy state.
-
-    Attributes:
-        _tree_name (str):
-        _root (tree_util_lite.core.tree.Node):
-
-    Properties:
-        tree_name (str):
-        root (tree_util_lite.core.tree.Node):
-
+    """A tree represent for file hierarchy state.
+    Must be initialized from `WorkspaceHash` instance.
     """
 
-    def __init__(self, tree_name, root_name):
+    def __init__(self, workspace_hash):
         """
         Args:
-            tree_name (str):
-            root_name (str):
-
+            workspace_hash (WorkspaceHash):
         """
-
-        super(StateTree, self).__init__(tree_name, root_name)
+        super(StateTree, self).__init__('state_tree', 'state_root')
 
 
 class State(object):
-    """A single State"""
+    """A single State
+
+    Attributes:
+        _state_id (str):
+        _state_file (Path):
+        _state_tree (StateTree):
+        _timestamp (str):
+        _session_list (list of str):
+        _data (dict):
+        _previous (State):
+        _next (State):
+
+    Properties:
+        state_id (str):
+        state_file (Path):
+        state_tree (StateTree):
+        timestamp (str):
+        session_list (list of str):
+        data (dict):
+        previous (State):
+        next (State):
+
+    """
 
     def __init__(self, state_file):
         """
         Args:
-            state_file (str or Path): JSON file which store state data
+            state_file (str|Path): JSON file which store state data
 
         """
 
         super(State, self).__init__()
         self._state_file = Path(state_file)
 
-    def from_workspace_hash(self, workspace_hash):
+    @property
+    def state_id(self):
+        return self._state_id
+
+    @property
+    def state_file(self):
+        return self._state_file
+
+    @property
+    def state_tree(self):
+        return self._state_tree
+
+    @property
+    def timestamp(self):
+        return self._timestamp
+
+    @property
+    def session_list(self):
+        return self._session_list
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def previous(self):
+        return self._previous
+
+    @property
+    def next(self):
+        return self._next
+
+    def set_previous(self, state):
         """
         Args:
-            workspace_hash (common.hashing.WorkspaceHash):
-
+            state (State):
         """
-
         pass
 
-
-class StateChain(object):
-    """
-    Chain of states.
-
-    """
-
-    def __init__(self, state_dir):
+    def set_next(self, state):
         """
         Args:
-            state_dir (str or Path): A folder store state data
+            state (State):
         """
+        pass
 
-        super(StateChain, self).__init__()
-        self._state_dir = Path(state_dir)
+    def update(self, workspace_hash, session_list, data):
+        """
+        Args:
+            workspace_hash (WorkspaceHash):
+            session_list (list of str):
+            data (dict):
+        """
+        pass
 
-    @property
-    def state_dir(self):
-        """Path: """
-        return self._state_dir
+    def save(self):
+        pass
 
-    @property
-    def latest_state(self):
-        """str: """
-        return '0x00000000000000000000000000000000000000'
+    def load(self):
+        pass

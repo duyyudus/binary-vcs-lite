@@ -1,10 +1,10 @@
 from _setup_test import *
 
 
-class TestVcsInterface(unittest.TestCase):
+class TestVersioningInterface(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestVcsInterface, self).__init__(*args, **kwargs)
+        super(TestVersioningInterface, self).__init__(*args, **kwargs)
 
     def setUp(self):
         create_workspace_dir()
@@ -12,27 +12,37 @@ class TestVcsInterface(unittest.TestCase):
     def tearDown(self):
         cleanup_output_data()
 
-    def test_local_working(self):
-        log_info()
-        work = vcs_interface.LocalWorking(TEST_OUTPUT_DATA_WORKSPACE_DIR, init=1)
-        self.assertTrue(work._repo.deep_dir.exists())
-        self.assertTrue(work._workspace.deep_dir.exists())
 
-    def test_remote_working(self):
-        log_info()
-        work = vcs_interface.RemoteWorking(
-            TEST_OUTPUT_DATA_WORKSPACE_DIR,
-            TEST_OUTPUT_DATA_REMOTE_WORKSPACE_DIR,
-            init=1
-        )
-        self.assertTrue(work._repo.deep_dir.exists())
-        self.assertTrue(work._workspace.deep_dir.exists())
+class TestLocalVersioning(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TestLocalVersioning, self).__init__(*args, **kwargs)
+
+    def setUp(self):
+        create_workspace_dir()
+
+    def tearDown(self):
+        cleanup_output_data()
+
+
+class TestRemoteVersioning(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TestRemoteVersioning, self).__init__(*args, **kwargs)
+
+    def setUp(self):
+        create_workspace_dir()
+
+    def tearDown(self):
+        cleanup_output_data()
 
 
 @log_test(__file__)
 def run():
     testcase_classes = [
-        TestVcsInterface,
+        TestVersioningInterface,
+        TestLocalVersioning,
+        TestRemoteVersioning
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)

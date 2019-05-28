@@ -1,10 +1,10 @@
 from _setup_test import *
 
 
-class TestCoreBlob(unittest.TestCase):
+class TestBlob(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestCoreBlob, self).__init__(*args, **kwargs)
+        super(TestBlob, self).__init__(*args, **kwargs)
 
     def setUp(self):
         create_workspace_dir()
@@ -19,6 +19,8 @@ class TestCoreBlob(unittest.TestCase):
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'], REPO['BLOB_FOLDER'])
         )
         results = b.store_blob(workspace_hash, verbose=1)
+
+        self.assertGreater(len(results), 0)
         for p in results:
             self.assertTrue(Path(p).exists())
 
@@ -32,6 +34,8 @@ class TestCoreBlob(unittest.TestCase):
         cleanup_workspace_dir()
 
         results = b.extract_blob(workspace_hash, verbose=1)
+
+        self.assertGreater(len(results), 0)
         for p in results:
             self.assertTrue(Path(p).exists())
 
@@ -39,7 +43,7 @@ class TestCoreBlob(unittest.TestCase):
 @log_test(__file__)
 def run():
     testcase_classes = [
-        TestCoreBlob,
+        TestBlob,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)

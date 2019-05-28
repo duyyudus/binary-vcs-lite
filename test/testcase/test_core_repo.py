@@ -1,10 +1,10 @@
 from _setup_test import *
 
 
-class TestCoreRepo(unittest.TestCase):
+class TestRepo(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestCoreRepo, self).__init__(*args, **kwargs)
+        super(TestRepo, self).__init__(*args, **kwargs)
 
     def setUp(self):
         create_workspace_dir()
@@ -12,24 +12,11 @@ class TestCoreRepo(unittest.TestCase):
     def tearDown(self):
         cleanup_output_data()
 
-    def test_repo_attr(self):
-        log_info()
-        new_repo = repo.Repo(TEST_OUTPUT_DATA_WORKSPACE_DIR, init=1)
-        self.assertEqual(new_repo.repo_dir, Path(TEST_OUTPUT_DATA_WORKSPACE_DIR))
-        self.assertEqual(
-            new_repo.deep_dir,
-            Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER'])
-        )
-        self.assertEqual(
-            new_repo.repo_id,
-            hashing.hash_str(Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['REPO_FOLDER']).as_posix())
-        )
-
 
 @log_test(__file__)
 def run():
     testcase_classes = [
-        TestCoreRepo,
+        TestRepo,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)

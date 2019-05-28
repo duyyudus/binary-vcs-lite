@@ -5,115 +5,167 @@ from binary_vcs_lite.common import hashing
 class Workspace(object):
     """Manage working directory.
 
-    Controls which files to track
+    Controls which files to track using glob/regex file patterns
     and handle workspace-related operations
 
     It must connect to a `core.repo.Repo`
 
     Attributes:
+        _file_pattern (dict):
         _workspace_dir (Path):
         _deep_dir (Path):
         _metadata_path (Path):
-        _current_state (str):
+        _session_id (str):
+        _revision (int):
+        _repo (Repo):
 
     Properties:
-        deep_dir (Path):
+        file_pattern (dict):
         workspace_dir (Path):
+        deep_dir (Path):
+        session_id (str):
+        revision (int):
+        repo_id (str):
         workspace_hash (common.hashing.WorkspaceHash):
-        current_state (str):
 
     """
 
-    def __init__(self, workspace_dir, repo, init=0):
+    def __init__(self, workspace_dir, repo, session_id, init=0):
         """
         Args:
-            workspace_dir (str or Path): Any folder with sub-hierarchy `VCS_FOLDER/WORKSPACE_FOLDER`
-            repo (core.repo.Repo)
+            workspace_dir (str|Path): Any folder with sub-hierarchy `VCS_FOLDER/WORKSPACE_FOLDER`
+            repo (Repo):
+            session_id (str):
+            init (bool):
 
         """
 
         super(Workspace, self).__init__()
-        self._workspace_dir = Path(workspace_dir)
-        self._deep_dir = Path(self._workspace_dir, VCS_FOLDER, WORKSPACE['WORKSPACE_FOLDER'])
-
-        if init:
-            self._init_deep_dir()
-        else:
-            assert self._deep_dir.exists(), 'Invalid Workspace folder'
-
-        self._metadata_path = Path(self._deep_dir, WORKSPACE['METADATA_FILE'])
-
-        self.connect_repo(repo)
 
     @property
-    def deep_dir(self):
-        """Path: """
-        return self._deep_dir
+    def file_pattern(self):
+        return self._file_pattern
 
     @property
     def workspace_dir(self):
-        """Path: """
         return self._workspace_dir
 
     @property
-    def workspace_hash(self):
-        """common.hashing.WorkspaceHash: """
-        return hashing.hash_workspace(self._workspace_dir)
+    def deep_dir(self):
+        return self._deep_dir
 
     @property
-    def current_state(self):
+    def session_id(self):
+        return self._session_id
+
+    @property
+    def revision(self):
+        return self._revision
+
+    @property
+    def repo_id(self):
         """str: """
-        return self._current_state
+        pass
 
-    def _init_deep_dir(self):
-        if not self._deep_dir.exists():
-            self._deep_dir.mkdir(parents=1)
+    @property
+    def workspace_hash(self):
+        """WorkspaceHash: """
+        pass
 
-    def _save_current_state(self, repo_id, repo_dir, current_state):
-        metadata = load_json(self._metadata_path)
+    def set_file_pattern(self, file_pattern):
+        """
+        Args:
+            file_pattern (dict):
+        """
+        pass
 
-        if WORKSPACE['REPO_RECORD_KEY'] not in metadata:
-            metadata = {
-                WORKSPACE['REPO_RECORD_KEY']: {
-                    repo_id: {
-                        WORKSPACE['PATH_KEY']: str(repo_dir),
-                        WORKSPACE['CURRENT_STATE_KEY']: current_state
-                    }
-                }
-            }
-        else:
-            metadata[WORKSPACE['REPO_RECORD_KEY']][repo_id] = {
-                WORKSPACE['PATH_KEY']: str(repo_dir),
-                WORKSPACE['CURRENT_STATE_KEY']: current_state
-            }
-        save_json(metadata, self._metadata_path)
+    def connect_repo(self, repo, session_id):
+        """
+        Args:
+            repo (Repo):
+            session_id (str):
+        """
+        pass
 
-    def _load_current_state(self, repo_id):
-        metadata = load_json(self._metadata_path)
+    def absolute_path(self, hash_value):
+        """
+        Args:
+            hash_value (str):
+        """
+        pass
 
-        if WORKSPACE['REPO_RECORD_KEY'] not in metadata:
-            return None
+    def commit(self, session_list, data, add_only, fast_forward):
+        """
+        Args:
+            session_list (list of str):
+            data (dict):
+            add_only (bool):
+            fast_forward (bool):
+        """
+        pass
 
-        record = metadata[WORKSPACE['REPO_RECORD_KEY']]
-        if repo_id in record:
-            return record[repo_id][WORKSPACE['CURRENT_STATE_KEY']]
+    def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
+        """
+        Args:
+            session_id (str):
+            revision (int|str):
+            checkout_dir (Path, None by default):
+            overwrite (bool, False by default):
+        """
+        pass
 
-    def connect_repo(self, repo):
-        self._repo = repo
+    def save(self):
+        pass
 
-        current_state = self._load_current_state(repo.repo_id)
+    def load(self):
+        pass
 
-        if not current_state:
-            current_state = repo.latest_state
-            self._save_current_state(
-                repo.repo_id,
-                repo.repo_dir,
-                current_state
-            )
+    def detect_revision(self):
+        """
+        Returns:
+            int:
+        """
+        pass
 
-        self._current_state = current_state
+    def latest_revision(self, session_id):
+        """Wrap same method in `self._repo`
 
-    def absolute_path(self, relative_path):
-        """Join relative path and working dir."""
+        Args:
+            session_id (str):
 
-        return Path(self._workspace_dir, relative_path)
+        Returns:
+            int:
+        """
+        pass
+
+    def all_revision(self, session_id):
+        """Wrap same method in `self._repo`
+
+        Args:
+            session_id (str):
+
+        Returns:
+            list of int:
+        """
+        pass
+
+    def all_session(self):
+        """Wrap same method in `self._repo`
+
+        Returns:
+            list of str:
+        """
+        pass
+
+    def detail_file_version(self, session_id, revision, relative_path):
+        """Wrap same method in `self._repo`
+
+        Args:
+            session_id (str):
+            revision (int, None by default):
+            relative_path (str|Path, None by default):
+
+        Returns:
+            dict:
+        """
+        pass

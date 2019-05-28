@@ -1,10 +1,10 @@
 from _setup_test import *
 
 
-class TestCoreSession(unittest.TestCase):
+class TestSession(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestCoreSession, self).__init__(*args, **kwargs)
+        super(TestSession, self).__init__(*args, **kwargs)
 
     def setUp(self):
         create_workspace_dir()
@@ -16,7 +16,7 @@ class TestCoreSession(unittest.TestCase):
 @log_test(__file__)
 def run():
     testcase_classes = [
-        TestCoreSession,
+        TestSession,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)

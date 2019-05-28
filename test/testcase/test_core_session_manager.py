@@ -1,22 +1,10 @@
 from _setup_test import *
 
 
-class TestState(unittest.TestCase):
+class TestSessionManager(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestState, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        create_workspace_dir()
-
-    def tearDown(self):
-        cleanup_output_data()
-
-
-class TestStateTree(unittest.TestCase):
-
-    def __init__(self, *args, **kwargs):
-        super(TestStateTree, self).__init__(*args, **kwargs)
+        super(TestSessionManager, self).__init__(*args, **kwargs)
 
     def setUp(self):
         create_workspace_dir()
@@ -28,8 +16,7 @@ class TestStateTree(unittest.TestCase):
 @log_test(__file__)
 def run():
     testcase_classes = [
-        TestState,
-        TestStateTree
+        TestSessionManager,
     ]
     for tc in testcase_classes:
         testcase = unittest.TestLoader().loadTestsFromTestCase(tc)

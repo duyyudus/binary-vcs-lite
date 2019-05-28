@@ -5,23 +5,15 @@ import time
 import json
 import re
 import shutil
+from pprint import pformat
 
 if sys.version_info[0] == 3:
     from pathlib import Path, PurePath
 else:
     from pathlib2 import Path, PurePath
-from pprint import pformat
 
-from . import config
+from .config import *
 
-CFG_DICT = config.CFG_DICT
-
-VCS_FOLDER = CFG_DICT['VCS_FOLDER']
-REPO = CFG_DICT['REPO']
-WORKSPACE = CFG_DICT['WORKSPACE']
-
-LOG_PREFIX = CFG_DICT['LOG_PREFIX']
-LOG_ERROR_PREFIX = CFG_DICT['LOG_ERROR_PREFIX']
 _log_on = 1
 
 
@@ -98,6 +90,13 @@ def switch_log_vcs(is_on):
 
 
 def match_regex_pattern(input_str, patterns):
+    """
+    Args:
+        input_str (str):
+        patterns (list of str):
+    Returns:
+        bool:
+    """
     for p in patterns:
         if re.findall(p, input_str):
             return 1
@@ -126,7 +125,7 @@ def batch_copy(path_pair, overwrite=0, verbose=0):
         path_pair (list of 2-tuple): List of 2-tuple of str, [(source, target),...]
 
     Returns:
-        list of str: List of copied files
+        list of str: List of copied file paths
     """
 
     copied = []

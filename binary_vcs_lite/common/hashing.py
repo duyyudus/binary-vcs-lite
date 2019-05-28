@@ -1,28 +1,65 @@
 import hashlib
 from .util import *
+from .config import *
+
+DEFAULT_FILE_PATTERN = {
+    'include': CFG_DICT['INCLUDE_PATTERN'],
+    'exclude': CFG_DICT['EXCLUDE_PATTERN']
+}
 
 
 class WorkspaceHash(dict):
-    """
+    """An instance of this class represent for a specific workspace,
+    "workspace" means a set of file and their hash digest.
+
+    Once instantiated, it cannot modify itself to represent for another workspace.
+    Although it can point to different workspace parent directories,
+    but the set of files-and-hashes is kept intact.
+
     A dict with structure::
 
         {
             file_id: {
-                hash_key: sha1_digest,
-                relative_path_key: str,
-                absolute_path_key: str
+                HASH_KEY: sha1_digest,
+                RELATIVE_PATH_KEY: str,
+                ABSOLUTE_PATH_KEY: str
             },
         }
 
         Key-value of `file_id` is paired-value of `relative_path_key` in POSIX format
         Paired-value of `absolute_path_key` depend on workspace location
 
+    Attributes:
+        _workspace_dir (Path):
+
     """
 
-    def __init__(self):
+    def __init__(self, workspace_dir):
+        """
+        Args:
+            workspace_dir (str|Path): Any folder with sub-hierarchy `VCS_FOLDER/WORKSPACE_FOLDER`
+        """
         super(WorkspaceHash, self).__init__()
+        self._workspace_dir = workspace_dir
+
+    def set_workspace_dir(self, target_dir):
+        """
+        Args:
+            target_dir (str|Path):
+        """
+        self._workspace_dir = target_dir
+        for f in self:
+            abs_path = Path(self._workspace_dir, self[f][WORKSPACE['RELATIVE_PATH_KEY']])
+            self[f][WORKSPACE['ABSOLUTE_PATH_KEY']] = abs_path.as_posix()
 
     def hash_to_path(self, hash_value):
+        """
+        Args:
+            hash_value (str):
+
+        Returns:
+            str:
+        """
         for file_id in self:
             if hash_value == self[file_id][WORKSPACE['HASH_KEY']]:
                 return self[file_id][WORKSPACE['RELATIVE_PATH_KEY']]
@@ -50,10 +87,11 @@ def hash_str(input_str):
 
 # @_time_measure
 def hash_workspace(workspace_dir,
-                   include_pattern=config.CFG_DICT['INCLUDE_PATTERN'],
-                   exclude_pattern=config.CFG_DICT['EXCLUDE_PATTERN'],
+                   file_pattern=DEFAULT_FILE_PATTERN,
                    verbose=0):
     """Scan input working directory and return `WorkspaceHash` data.
+
+    This is the only way to create a new `WorkspaceHash` instance.
 
     Args:
         workspace_dir (str or Path): Path to working directory
@@ -68,11 +106,11 @@ def hash_workspace(workspace_dir,
     """
 
     # Need this in case None is passed into pattern value
-    include_pattern = include_pattern if include_pattern else config.CFG_DICT['INCLUDE_PATTERN']
-    exclude_pattern = exclude_pattern if exclude_pattern else config.CFG_DICT['EXCLUDE_PATTERN']
+    include_pattern = file_pattern['include'] if file_pattern else DEFAULT_FILE_PATTERN['include']
+    exclude_pattern = file_pattern['exclude'] if file_pattern else DEFAULT_FILE_PATTERN['exclude']
 
-    workspace_hash = WorkspaceHash()
     workspace_dir = Path(workspace_dir)
+    workspace_hash = WorkspaceHash(workspace_dir)
     all_paths = []
     for pattern in include_pattern:
         all_paths.extend(workspace_dir.glob(pattern))
@@ -89,11 +127,12 @@ def hash_workspace(workspace_dir,
                 log_info('{}: {}'.format(str(p), hash_data))
             workspace_hash[rel_path.as_posix()] = {
                 WORKSPACE['HASH_KEY']: hash_data,
-                WORKSPACE['RELATIVE_PATH_KEY']: str(rel_path),
-                WORKSPACE['ABSOLUTE_PATH_KEY']: str(p)
+                WORKSPACE['RELATIVE_PATH_KEY']: str(rel_path)
             }
         except Exception as e:
             if verbose:
                 log_info('Skipped: {}'.format(str(p)))
                 log_info('----Error: {}'.format(e))
+
+    workspace_hash.set_workspace_dir(workspace_dir)
     return workspace_hash

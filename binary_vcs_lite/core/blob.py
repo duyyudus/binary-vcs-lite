@@ -52,6 +52,8 @@ class Blob(object):
 
         Args:
             workspace_hash (common.hashing.WorkspaceHash):
+        Returns:
+            list of str:
 
         """
 
@@ -80,6 +82,8 @@ class Blob(object):
 
         Args:
             workspace_hash (common.hashing.WorkspaceHash):
+        Returns:
+            list of str:
 
         """
 

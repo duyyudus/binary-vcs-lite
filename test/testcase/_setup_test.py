@@ -13,13 +13,14 @@ sys.path.append(str(_cur_file.parent.parent.parent))
 # There must be a Git repo `tree-util-lite` in the same folder with `binary-vcs-lite` repo
 sys.path.append(str(_cur_file.parent.parent.parent.parent.joinpath('tree-util-lite')))
 
+from binary_vcs_lite.common.util import *
+from binary_vcs_lite.common.config import *
+
 from binary_vcs_lite.common import (
     config,
     util,
     hashing
 )
-
-from binary_vcs_lite.common.util import *
 
 from binary_vcs_lite.core import (
     repo,
@@ -35,7 +36,8 @@ TEST_ROOT = Path(__file__).resolve().parent.parent
 TEST_SAMPLE_DATA_WORKSPACE_DIR = str(TEST_ROOT.joinpath('sample_data', 'last'))
 TEST_OUTPUT_DATA = str(TEST_ROOT.joinpath('output_data'))
 TEST_OUTPUT_DATA_WORKSPACE_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
-TEST_OUTPUT_DATA_REMOTE_WORKSPACE_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('remote_last'))
+TEST_OUTPUT_DATA_LOCAL_REPO_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
+TEST_OUTPUT_DATA_REMOTE_REPO_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('remote_last'))
 
 
 def cleanup_output_data():
