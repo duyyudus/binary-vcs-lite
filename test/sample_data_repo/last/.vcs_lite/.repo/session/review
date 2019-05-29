@@ -1,0 +1,41 @@
+{
+    "revision": {
+        "1": "s0",
+        "2": "s1",
+        "3": "s2",
+        "4": "s3",
+        "5": "s4",
+        "6": "s5"
+    },
+    "detail_version": {
+        "1": {
+            "relative/path/to/file1": 1,
+            "relative/path/to/file2": 1,
+            "relative/path/to/file3": 1
+        },
+        "2": {
+            "relative/path/to/file1": 2,
+            "relative/path/to/file2": 1,
+            "relative/path/to/file3": 2
+        },
+        "3": {
+            "relative/path/to/file1": 2,
+            "relative/path/to/file2": 1,
+            "relative/path/to/file3": 2
+        },
+        "4": {
+            "relative/path/to/file1": 2,
+            "relative/path/to/file2": 2,
+            "relative/path/to/file3": 3
+        },
+        "5": {
+            "relative/path/to/file1": 2,
+            "relative/path/to/file2": 2
+        },
+        "6": {
+            "relative/path/to/file1": 2,
+            "relative/path/to/file2": 2,
+            "relative/path/to/file3": 4
+        }
+    }
+}

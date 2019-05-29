@@ -35,7 +35,9 @@ from binary_vcs_lite.core import (
 from binary_vcs_lite import vcs_interface
 
 TEST_ROOT = Path(__file__).resolve().parent.parent
-TEST_SAMPLE_DATA_WORKSPACE_DIR = str(TEST_ROOT.joinpath('sample_data', 'last'))
+TEST_SAMPLE_DATA_WORKSPACE_DIR = str(TEST_ROOT.joinpath('sample_data_workspace', 'last'))
+TEST_SAMPLE_DATA_REPO_DIR = str(TEST_ROOT.joinpath('sample_data_repo', 'last'))
+
 TEST_OUTPUT_DATA = str(TEST_ROOT.joinpath('output_data'))
 TEST_OUTPUT_DATA_WORKSPACE_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
 TEST_OUTPUT_DATA_LOCAL_REPO_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
@@ -48,17 +50,37 @@ def cleanup_output_data():
 
 
 def create_workspace_dir():
+    """Copy from sample workspace dir to output folder."""
     for p in Path(TEST_SAMPLE_DATA_WORKSPACE_DIR).iterdir():
-        if p.name == '.vcs_lite':
+        if p.name == VCS_FOLDER:
             continue
         target = Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, p.name)
         if not target.exists():
             shutil.copytree(str(p), str(target))
 
 
+def create_repo_dir(local=1):
+    """Copy from sample repo dir to output folder."""
+    for p in Path(TEST_SAMPLE_DATA_REPO_DIR).iterdir():
+        target = Path(
+            TEST_OUTPUT_DATA_LOCAL_REPO_DIR if local else TEST_OUTPUT_DATA_REMOTE_REPO_DIR,
+            p.name
+        )
+        if not target.exists():
+            shutil.copytree(str(p), str(target))
+
+
 def cleanup_workspace_dir():
+    """Clean output workspace dir."""
     for p in Path(TEST_OUTPUT_DATA_WORKSPACE_DIR).iterdir():
-        if not p.name == config.CFG_DICT['VCS_FOLDER']:
+        if p.name != VCS_FOLDER:
+            shutil.rmtree(str(p))
+
+
+def cleanup_repo_dir():
+    """Clean output repo dir."""
+    for p in Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).iterdir():
+        if p.name == VCS_FOLDER:
             shutil.rmtree(str(p))
 
 

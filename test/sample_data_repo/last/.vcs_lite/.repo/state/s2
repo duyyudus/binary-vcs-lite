@@ -10,7 +10,7 @@
 		"publish"
 	],
 	"data": {
-		"message": 'this is the 3rd state',
+		"message": 'this is state 2',
 		"message_tag": {}
 	}
 }

@@ -60,7 +60,7 @@ class Session(object):
     def detail_file_version(self, revision, relative_path=None):
         """
         Args:
-            revision (int):
+            revision (int|str):
             relative_path (str|Path, None by default):
 
         Returns:

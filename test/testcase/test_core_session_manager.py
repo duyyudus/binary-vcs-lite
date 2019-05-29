@@ -7,7 +7,7 @@ class TestSessionManager(unittest.TestCase):
         super(TestSessionManager, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_repo_dir()
 
     def tearDown(self):
         cleanup_output_data()

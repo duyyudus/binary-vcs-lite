@@ -6,8 +6,8 @@ class TestState(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestState, self).__init__(*args, **kwargs)
-        self.test_state_file = Path(
-            TEST_OUTPUT_DATA_WORKSPACE_DIR,
+        self.output_state_file = Path(
+            TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
             VCS_FOLDER,
             REPO['FOLDER'],
             STATE['FOLDER'],
@@ -15,20 +15,50 @@ class TestState(unittest.TestCase):
         )
 
     def setUp(self):
+        create_repo_dir()
         create_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()
 
-    def test_update(self):
+    def test_init(self):
+        s0 = State(self.output_state_file)
+        self.assertEqual(s0.state_file, self.output_state_file)
+        self.assertEqual(s0.state_id, self.output_state_file.name)
+        self.assertIs(s0.previous, None)
+        self.assertIs(s0.next, None)
+
+    def test_properties(self):
+        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
-        s0 = State(self.test_state_file)
+        s0 = State(self.output_state_file)
+        s0.update(
+            workspace_hash,
+            ['review'],
+            {'message': 'test_state'}
+        )
+        self.assertIs(s0.state_id, s0._state_id)
+        self.assertIs(s0.state_file, s0._state_file)
+        self.assertIs(s0.state_tree, s0._state_tree)
+        self.assertIs(s0.timestamp, s0._timestamp)
+        self.assertIs(s0.session_list, s0._session_list)
+        self.assertIs(s0.data, s0._data)
+        self.assertIs(s0.previous, s0._previous)
+        self.assertIs(s0.next, s0._next)
+
+    def test_update_and_save(self):
+        log_info()
+        workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
+        s0 = State(self.output_state_file)
+
+        # save() is called in update()
         s0.update(
             workspace_hash,
             ['review'],
             {'message': 'test_state'}
         )
 
+        # Test update()
         for v in workspace_hash.values():
             relative_path = v[WORKSPACE_HASH['RELATIVE_PATH_KEY']]
             hash_value = v[WORKSPACE_HASH['HASH_KEY']]
@@ -40,31 +70,8 @@ class TestState(unittest.TestCase):
         self.assertGreater(len(s0.session_list), 0)
         self.assertGreater(len(s0.data.values()), 0)
 
-    def test_set_next(self):
-        s0 = State('path/to/s0')
-        s1 = State('path/to/s1')
-        s0.set_next(s1)
-        self.assertEqual(s0.next, s1)
-        self.assertEqual(s1.previous, s0)
-
-    def test_set_previous(self):
-        s0 = State('path/to/s0')
-        s1 = State('path/to/s1')
-        s1.set_previous(s0)
-        self.assertEqual(s0.next, s1)
-        self.assertEqual(s1.previous, s0)
-
-    def test_save(self):
-        workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
-        s0 = State(self.test_state_file)
-        s0.update(
-            workspace_hash,
-            ['review'],
-            {'message': 'test_state'}
-        )
-        s0.save()
-
-        valid_data = load_json(self.test_state_file)
+        # Test save()
+        valid_data = load_json(self.output_state_file)
         self.assertEqual(
             valid_data[STATE['CONTENT']['TIMESTAMP_KEY']],
             s0.timestamp
@@ -83,20 +90,36 @@ class TestState(unittest.TestCase):
             n = s0.state_tree.search(Path(f).parent.as_posix())
             self.assertGreater(len(n), 0)
 
+    def test_set_next(self):
+        log_info()
+        s0 = State('path/to/s0')
+        s1 = State('path/to/s1')
+        s0.set_next(s1)
+        self.assertIs(s0.next, s1)
+        self.assertIs(s1.previous, s0)
+
+    def test_set_previous(self):
+        log_info()
+        s0 = State('path/to/s0')
+        s1 = State('path/to/s1')
+        s1.set_previous(s0)
+        self.assertIs(s0.next, s1)
+        self.assertIs(s1.previous, s0)
+
     def test_load(self):
+        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
-        s0 = State(self.test_state_file)
+        s0 = State(self.output_state_file)
         s0.update(
             workspace_hash,
             ['review'],
             {'message': 'test_state'}
         )
-        s0.save()
 
-        s0 = State(self.test_state_file)
-        s0.load()
+        # load() is called in __init__()
+        s0 = State(self.output_state_file)
 
-        valid_data = load_json(self.test_state_file)
+        valid_data = load_json(self.output_state_file)
         self.assertEqual(
             valid_data[STATE['CONTENT']['TIMESTAMP_KEY']],
             s0.timestamp
@@ -122,7 +145,7 @@ class TestStateTree(unittest.TestCase):
         super(TestStateTree, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_repo_dir()
 
     def tearDown(self):
         cleanup_output_data()
