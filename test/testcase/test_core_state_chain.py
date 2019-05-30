@@ -12,6 +12,12 @@ class TestStateChain(unittest.TestCase):
             REPO['FOLDER'],
             STATE['FOLDER']
         )
+        self.sample_state_dir = Path(
+            TEST_SAMPLE_DATA_REPO_DIR,
+            VCS_FOLDER,
+            REPO['FOLDER'],
+            STATE['FOLDER']
+        )
 
     def setUp(self):
         create_repo_dir()
@@ -21,7 +27,7 @@ class TestStateChain(unittest.TestCase):
 
     def test_properties(self):
         log_info()
-        sc = StateChain(self.output_state_dir)
+        sc = StateChain(self.sample_state_dir)
 
         self.assertIs(sc.state_dir, sc._state_dir)
         self.assertIs(sc.all_state_id, sc._all_state_id)
@@ -30,24 +36,38 @@ class TestStateChain(unittest.TestCase):
 
     def test_init(self):
         log_info()
-        sc = StateChain(self.output_state_dir)
+        sc = StateChain(self.sample_state_dir)
+        self.assertEqual(sc.state_dir, self.sample_state_dir)
+
         all_state_id = ['s0', 's1', 's2', 's3', 's4', 's5']
         self.assertEqual(sc.all_state_id, all_state_id)
         for i in all_state_id:
             self.assertEqual(sc.state_data[i].state_id, i)
 
+        try:
+            sc = StateChain('not/exists/dir')
+        except Exception as e:
+            self.assertTrue(check_type(e, [state_chain.InvalidRepoState]))
+
     def test_load_state(self):
         log_info()
-        s0_file = self.output_state_dir.joinpath('s0')
-        s1_file = self.output_state_dir.joinpath('s1')
-        sc = StateChain(self.output_state_dir)
+        s0_file = self.sample_state_dir.joinpath('s0')
+        s1_file = self.sample_state_dir.joinpath('s1')
+
+        sc = StateChain(self.sample_state_dir)
+        sc._reset()
+
         sc.load_state(s0_file)
         self.assertIs(sc.last_state.state_id, 's0')
-
         sc.load_state(s1_file)
         self.assertIs(sc.last_state.state_id, 's1')
         self.assertIs(sc.state_data['s0'].next, sc.state_data['s1'])
         self.assertIs(sc.state_data['s1'].previous, sc.state_data['s0'])
+
+        try:
+            sc.load_state('not/under/same/state_dir/state')
+        except Exception as e:
+            self.assertTrue(check_type(e, [state_chain.InvalidState]))
 
     def test_new_state(self):
         log_info()
@@ -67,7 +87,7 @@ class TestStateChain(unittest.TestCase):
             self.assertEqual(n[0].data, hash_value)
 
         self.assertEqual(new_state.state_id, 's6')
-        self.assertTrue(new_state.timestamp is not None)
+        self.assertTrue(check_type(new_state.timestamp, [str]))
         self.assertGreater(len(new_state.session_list), 0)
         self.assertGreater(len(new_state.data.values()), 0)
 

@@ -1,5 +1,6 @@
 from _setup_test import *
 State = state.State
+StateTree = state.StateTree
 
 
 class TestState(unittest.TestCase):
@@ -8,6 +9,13 @@ class TestState(unittest.TestCase):
         super(TestState, self).__init__(*args, **kwargs)
         self.output_state_file = Path(
             TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
+            VCS_FOLDER,
+            REPO['FOLDER'],
+            STATE['FOLDER'],
+            's0'
+        )
+        self.sample_state_file = Path(
+            TEST_SAMPLE_DATA_REPO_DIR,
             VCS_FOLDER,
             REPO['FOLDER'],
             STATE['FOLDER'],
@@ -22,21 +30,21 @@ class TestState(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        s0 = State(self.output_state_file)
-        self.assertEqual(s0.state_file, self.output_state_file)
-        self.assertEqual(s0.state_id, self.output_state_file.name)
+        s0 = State(self.sample_state_file)
+        self.assertEqual(s0.state_file, self.sample_state_file)
+        self.assertEqual(s0.state_id, self.sample_state_file.name)
         self.assertIs(s0.previous, None)
         self.assertIs(s0.next, None)
+        self.assertGreater(len(s0.session_list), 0)
+        self.assertGreater(len(s0.data), 0)
+        self.assertTrue(check_type(s0.state_tree, [state.StateTree]))
+        self.assertTrue(check_type(s0.timestamp, [str]))
 
     def test_properties(self):
         log_info()
-        workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
-        s0 = State(self.output_state_file)
-        s0.update(
-            workspace_hash,
-            ['review'],
-            {'message': 'test_state'}
-        )
+
+        s0 = State(self.sample_state_file)
+
         self.assertIs(s0.state_id, s0._state_id)
         self.assertIs(s0.state_file, s0._state_file)
         self.assertIs(s0.state_tree, s0._state_tree)
@@ -66,7 +74,7 @@ class TestState(unittest.TestCase):
             self.assertGreater(len(n), 0)
             self.assertEqual(n[0].data, hash_value)
 
-        self.assertTrue(s0.timestamp is not None)
+        self.assertTrue(check_type(s0.timestamp, [str]))
         self.assertGreater(len(s0.session_list), 0)
         self.assertGreater(len(s0.data.values()), 0)
 
@@ -86,8 +94,8 @@ class TestState(unittest.TestCase):
         )
 
         self.assertGreater(len(valid_data[STATE['CONTENT']['FILE_KEY']]), 0)
-        for f in valid_data[STATE['CONTENT']['FILE_KEY']]:
-            n = s0.state_tree.search(Path(f).parent.as_posix())
+        for p in valid_data[STATE['CONTENT']['FILE_KEY']]:
+            n = s0.state_tree.search(Path(p).parent.as_posix())
             self.assertGreater(len(n), 0)
 
     def test_set_next(self):
@@ -108,18 +116,11 @@ class TestState(unittest.TestCase):
 
     def test_load(self):
         log_info()
-        workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
-        s0 = State(self.output_state_file)
-        s0.update(
-            workspace_hash,
-            ['review'],
-            {'message': 'test_state'}
-        )
 
         # load() is called in __init__()
-        s0 = State(self.output_state_file)
+        s0 = State(self.sample_state_file)
 
-        valid_data = load_json(self.output_state_file)
+        valid_data = load_json(self.sample_state_file)
         self.assertEqual(
             valid_data[STATE['CONTENT']['TIMESTAMP_KEY']],
             s0.timestamp
@@ -134,8 +135,8 @@ class TestState(unittest.TestCase):
         )
 
         self.assertGreater(len(valid_data[STATE['CONTENT']['FILE_KEY']]), 0)
-        for f in valid_data[STATE['CONTENT']['FILE_KEY']]:
-            n = s0.state_tree.search(Path(f).parent.as_posix())
+        for p in valid_data[STATE['CONTENT']['FILE_KEY']]:
+            n = s0.state_tree.search(Path(p).parent.as_posix())
             self.assertGreater(len(n), 0)
 
 
@@ -152,7 +153,7 @@ class TestStateTree(unittest.TestCase):
 
     def test_init(self):
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
-        state_tree = state.StateTree(workspace_hash)
+        state_tree = StateTree(workspace_hash)
         for v in workspace_hash.values():
             relative_path = v[WORKSPACE_HASH['RELATIVE_PATH_KEY']]
             hash_value = v[WORKSPACE_HASH['HASH_KEY']]

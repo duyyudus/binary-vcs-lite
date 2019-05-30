@@ -17,6 +17,10 @@ class Blob(object):
     Properties:
         blob_dir (Path):
 
+    Methods:
+        store_blob(workspace_hash, verbose=0)
+        extract_blob(workspace_hash, verbose=0)
+
     """
 
     def __init__(self, blob_dir):

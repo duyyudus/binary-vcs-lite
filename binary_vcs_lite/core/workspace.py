@@ -28,6 +28,20 @@ class Workspace(object):
         repo_id (str):
         workspace_hash (common.hashing.WorkspaceHash):
 
+    Methods:
+        set_file_pattern(file_pattern)
+        connect_repo(repo, session_id)
+        absolute_path(hash_value)
+        commit(session_list, data, add_only, fast_forward)
+        checkout(session_id, revision, checkout_dir=None, overwrite=False)
+        save()
+        load()
+        detect_revision()
+        latest_revision(session_id)
+        all_revision(session_id)
+        all_session()
+        detail_file_version(session_id, revision, relative_path)
+
     """
 
     def __init__(self, workspace_dir, repo, session_id, init=0):
@@ -44,22 +58,27 @@ class Workspace(object):
 
     @property
     def file_pattern(self):
+        """dict: """
         return self._file_pattern
 
     @property
     def workspace_dir(self):
+        """Path: """
         return self._workspace_dir
 
     @property
     def deep_dir(self):
+        """Path: """
         return self._deep_dir
 
     @property
     def session_id(self):
+        """str: """
         return self._session_id
 
     @property
     def revision(self):
+        """int: """
         return self._revision
 
     @property

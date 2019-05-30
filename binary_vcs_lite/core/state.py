@@ -59,34 +59,42 @@ class State(object):
 
     @property
     def state_id(self):
+        """str: """
         return self._state_id
 
     @property
     def state_file(self):
+        """Path: """
         return self._state_file
 
     @property
     def state_tree(self):
+        """StateTree: """
         return self._state_tree
 
     @property
     def timestamp(self):
+        """str: """
         return self._timestamp
 
     @property
     def session_list(self):
+        """list of str: """
         return self._session_list
 
     @property
     def data(self):
+        """dict: """
         return self._data
 
     @property
     def previous(self):
+        """State: """
         return self._previous
 
     @property
     def next(self):
+        """State: """
         return self._next
 
     def set_previous(self, target_state):

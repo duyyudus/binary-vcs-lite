@@ -29,6 +29,21 @@ class Repo(object):
         deep_dir (Path):
         repo_id (str):
 
+    Methods:
+        state_in(workspace_hash,
+                 session_list,
+                 data,
+                 current_session_id,
+                 current_revision,
+                 add_only)
+        state_out(workspace_hash, session_id, revision, overwrite)
+        save()
+        load()
+        latest_revision(session_id)
+        all_revision(session_id)
+        all_session()
+        detail_file_version(session_id, revision=None, relative_path=None)
+
     """
 
     def __init__(self, repo_dir, init=0):
@@ -43,10 +58,12 @@ class Repo(object):
 
     @property
     def repo_dir(self):
+        """Path: """
         return self._repo_dir
 
     @property
     def deep_dir(self):
+        """Path: """
         return self._deep_dir
 
     @property

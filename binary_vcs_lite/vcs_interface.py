@@ -13,6 +13,15 @@ class VersioningInterface(object):
     Properties:
         repo (core.repo.Repo):
         workspace (core.workspace.Workspace):
+
+    Methods:
+        set_file_pattern(file_pattern)
+        commit(session_list, data, add_only, fast_forward)
+        checkout(session_id, revision, checkout_dir=None, overwrite=False)
+        latest_revision(session_id)
+        all_revision(session_id)
+        all_session()
+        detail_file_version(session_id, revision, relative_path)
     """
 
     def __init__(self, workspace_dir, repo_dir, init_workspace, init_repo):

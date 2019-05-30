@@ -1,6 +1,10 @@
 from binary_vcs_lite.common.util import *
 
 
+class RevisionNotFound(VcsLiteError):
+    """Revision not found."""
+
+
 class Session(object):
     """Handle session data and behavior.
 
@@ -17,6 +21,12 @@ class Session(object):
         all_revision (list of int):
         latest_revision (int):
 
+    Methods:
+        sync_from_state_chain(state_chain)
+        save()
+        load()
+        detail_file_version(revision, relative_path=None)
+
     """
 
     def __init__(self, session_file):
@@ -28,14 +38,17 @@ class Session(object):
 
     @property
     def session_id(self):
+        """str: """
         return self._session_id
 
     @property
     def session_file(self):
+        """Path: """
         return self._session_file
 
     @property
     def revision_data(self):
+        """dict: """
         return self._revision_data
 
     @property
@@ -60,9 +73,10 @@ class Session(object):
     def detail_file_version(self, revision, relative_path=None):
         """
         Args:
-            revision (int|str):
+            revision (int, None by default):
             relative_path (str|Path, None by default):
-
+        Raises:
+            RevisionNotFound:
         Returns:
             dict:
         """

@@ -178,6 +178,8 @@ def check_type(obj, types, raise_exception=1):
         types (list): list of types/classes
     Raises:
         InvalidType:
+    Returns:
+        bool:
     """
 
     if isinstance(obj, tuple(types)):
