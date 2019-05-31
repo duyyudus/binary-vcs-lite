@@ -94,6 +94,16 @@ class StateChain(object):
             s2 (State):
 
         Returns:
-            dict: diff data
+            dict: diff data in below format
+                {
+                    'added': list,  # Added
+                    'deleted': list,  # Deleted
+                    'renamed': dict,  # Renamed: same parent, different label, same hash
+                    'unchanged': list,  # Unchanged: same parent, same label, same hash
+                    'modified': list,  # Modified: same parent, same label, different hash
+                    'moved': dict,  # Moved: different parent, same label, same hash
+                    'copied': dict,  # Copied: any node share hash with some node in `unchanged`
+                }
+
         """
         pass

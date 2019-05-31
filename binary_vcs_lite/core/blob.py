@@ -26,7 +26,7 @@ class Blob(object):
     def __init__(self, blob_dir):
         """
         Args:
-            blob_dir (str or Path): A folder store blob data
+            blob_dir (str|Path): A folder store blob data
 
         """
 

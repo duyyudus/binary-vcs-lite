@@ -29,7 +29,7 @@ class TestSession(unittest.TestCase):
         )
 
     def setUp(self):
-        create_repo_dir()
+        create_output_repo_dir()
 
     def tearDown(self):
         cleanup_output_data()

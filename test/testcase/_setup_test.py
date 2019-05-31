@@ -49,7 +49,7 @@ def cleanup_output_data():
         shutil.rmtree(TEST_OUTPUT_DATA)
 
 
-def create_workspace_dir():
+def create_output_workspace_dir():
     """Copy from sample workspace dir to output folder."""
     for p in Path(TEST_SAMPLE_DATA_WORKSPACE_DIR).iterdir():
         if p.name == VCS_FOLDER:
@@ -59,7 +59,7 @@ def create_workspace_dir():
             shutil.copytree(str(p), str(target))
 
 
-def create_repo_dir(local=1):
+def create_output_repo_dir(local=1):
     """Copy from sample repo dir to output folder."""
     for p in Path(TEST_SAMPLE_DATA_REPO_DIR).iterdir():
         target = Path(
@@ -70,18 +70,44 @@ def create_repo_dir(local=1):
             shutil.copytree(str(p), str(target))
 
 
-def cleanup_workspace_dir():
+def cleanup_output_workspace_dir():
     """Clean output workspace dir."""
     for p in Path(TEST_OUTPUT_DATA_WORKSPACE_DIR).iterdir():
         if p.name != VCS_FOLDER:
             shutil.rmtree(str(p))
 
 
-def cleanup_repo_dir():
+def cleanup_output_repo_dir():
     """Clean output repo dir."""
     for p in Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).iterdir():
         if p.name == VCS_FOLDER:
             shutil.rmtree(str(p))
+    for p in Path(TEST_OUTPUT_DATA_REMOTE_REPO_DIR).iterdir():
+        if p.name == VCS_FOLDER:
+            shutil.rmtree(str(p))
+
+
+def copy_dir(source, target):
+    """Remove existing files/folders before copying."""
+
+    source = Path(source)
+    if not source.exists():
+        return 0
+    target = Path(target)
+    if not target.exists():
+        target.mkdir(parents=1)
+    for s in source.iterdir():
+        t = target.joinpath(s.name)
+        if t.exists():
+            if t.is_dir():
+                shutil.rmtree(str(t))
+            else:
+                os.remove(str(t))
+
+        if s.is_dir():
+            shutil.copytree(str(s), str(t))
+        else:
+            shutil.copyfile(str(s), str(t))
 
 
 def start_log_test(testcase_path):

@@ -7,7 +7,7 @@ class TestVersioningInterface(unittest.TestCase):
         super(TestVersioningInterface, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_output_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()
@@ -19,7 +19,7 @@ class TestLocalVersioning(unittest.TestCase):
         super(TestLocalVersioning, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_output_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()
@@ -31,7 +31,7 @@ class TestRemoteVersioning(unittest.TestCase):
         super(TestRemoteVersioning, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_output_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()

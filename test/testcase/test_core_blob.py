@@ -7,7 +7,7 @@ class TestBlob(unittest.TestCase):
         super(TestBlob, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_output_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()
@@ -31,7 +31,7 @@ class TestBlob(unittest.TestCase):
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
         )
         b.store_blob(workspace_hash)
-        cleanup_workspace_dir()
+        cleanup_output_workspace_dir()
 
         results = b.extract_blob(workspace_hash, verbose=1)
 

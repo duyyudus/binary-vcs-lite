@@ -43,6 +43,8 @@ class WorkspaceHash(dict):
             target_dir (str|Path):
         """
         self._workspace_dir = target_dir
+
+    def update_abs_path(self):
         for f in self:
             abs_path = Path(self._workspace_dir, self[f][WORKSPACE_HASH['RELATIVE_PATH_KEY']])
             self[f][WORKSPACE_HASH['ABSOLUTE_PATH_KEY']] = abs_path.as_posix()

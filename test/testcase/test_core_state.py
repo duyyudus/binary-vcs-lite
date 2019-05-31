@@ -23,8 +23,8 @@ class TestState(unittest.TestCase):
         )
 
     def setUp(self):
-        create_repo_dir()
-        create_workspace_dir()
+        create_output_repo_dir()
+        create_output_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()
@@ -146,7 +146,7 @@ class TestStateTree(unittest.TestCase):
         super(TestStateTree, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_repo_dir()
+        create_output_repo_dir()
 
     def tearDown(self):
         cleanup_output_data()

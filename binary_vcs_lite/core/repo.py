@@ -4,6 +4,14 @@ from .state_chain import StateChain
 from .session_manager import SessionManager
 
 
+class RepoNotFound(VcsLiteError):
+    """There is no repo folder."""
+
+
+class OutOfDate(VcsLiteError):
+    """Current revision is older than the latest one."""
+
+
 class Repo(object):
     """Manage version control system repository.
 
@@ -30,13 +38,13 @@ class Repo(object):
         repo_id (str):
 
     Methods:
-        state_in(workspace_hash,
+        state_in(target_wh,
                  session_list,
                  data,
                  current_session_id,
                  current_revision,
                  add_only)
-        state_out(workspace_hash, session_id, revision, overwrite)
+        state_out(target_wh, session_id, revision, overwrite)
         save()
         load()
         latest_revision(session_id)
@@ -72,7 +80,7 @@ class Repo(object):
         pass
 
     def state_in(self,
-                 workspace_hash,
+                 target_wh,
                  session_list,
                  data,
                  current_session_id,
@@ -80,7 +88,7 @@ class Repo(object):
                  add_only):
         """
         Args:
-            workspace_hash (WorkspaceHash):
+            target_wh (WorkspaceHash):
             session_list (list of str):
             data (dict):
             current_session_id (str):
@@ -89,10 +97,10 @@ class Repo(object):
         """
         pass
 
-    def state_out(self, workspace_hash, session_id, revision, overwrite):
+    def state_out(self, target_wh, session_id, revision, overwrite):
         """
         Args:
-            workspace_hash (WorkspaceHash):
+            target_wh (WorkspaceHash):
             session_id (str):
             revision (int):
             overwrite (bool):

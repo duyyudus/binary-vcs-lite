@@ -7,7 +7,7 @@ class TestWorkspaceHash(unittest.TestCase):
         super(TestWorkspaceHash, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        create_workspace_dir()
+        create_output_workspace_dir()
 
     def tearDown(self):
         cleanup_output_data()

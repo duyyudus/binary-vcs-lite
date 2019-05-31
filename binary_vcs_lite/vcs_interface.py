@@ -27,8 +27,8 @@ class VersioningInterface(object):
     def __init__(self, workspace_dir, repo_dir, init_workspace, init_repo):
         """
         Args:
-            workspace_dir (Path):
-            repo_dir (Path):
+            workspace_dir (str|Path):
+            repo_dir (str|Path):
             init_workspace (bool):
             init_repo (bool):
         """
