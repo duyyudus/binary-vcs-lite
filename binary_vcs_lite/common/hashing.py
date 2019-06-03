@@ -36,6 +36,12 @@ class WorkspaceHash(dict):
         """
         super(WorkspaceHash, self).__init__()
         self._workspace_dir = workspace_dir
+        if workspace_dir:
+            self.update_abs_path()
+
+    @property
+    def workspace_dir(self):
+        return self._workspace_dir
 
     def set_workspace_dir(self, target_dir):
         """
@@ -43,6 +49,8 @@ class WorkspaceHash(dict):
             target_dir (str|Path):
         """
         self._workspace_dir = target_dir
+        if target_dir:
+            self.update_abs_path()
 
     def update_abs_path(self):
         for f in self:
@@ -101,6 +109,7 @@ def hash_workspace(workspace_dir,
         common.hashing.WorkspaceHash:
 
     """
+    log_info('Hashing workspace: {}'.format(str(workspace_dir)))
 
     # Need this in case None is passed into pattern value
     include_pattern = file_pattern['INCLUDE'] if file_pattern else DEFAULT_FILE_PATTERN['INCLUDE']
@@ -132,4 +141,5 @@ def hash_workspace(workspace_dir,
                 log_info('----Error: {}'.format(e))
 
     workspace_hash.set_workspace_dir(workspace_dir)
+    log_info('Hashing completed')
     return workspace_hash

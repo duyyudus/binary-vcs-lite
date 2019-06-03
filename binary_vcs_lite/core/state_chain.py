@@ -26,7 +26,7 @@ class StateChain(object):
 
     Methods:
         load_state(state_file)
-        new_state(workspace_hash, session_list, data)
+        new_state(workspace_hash, session_list, data, save=True)
         compare_state(s1, s2)
 
     """
@@ -69,18 +69,19 @@ class StateChain(object):
     def load_state(self, state_file):
         """
         Args:
-            state_file (str|Path)
+            state_file (str|Path):
         Raises:
             InvalidState:
         """
         pass
 
-    def new_state(self, workspace_hash, session_list, data):
+    def new_state(self, workspace_hash, session_list, data, save=True):
         """
         Args:
             workspace_hash (WorkspaceHash):
             session_list (list of str):
             data (dict):
+            save (bool, True by default):
 
         Returns:
             State:

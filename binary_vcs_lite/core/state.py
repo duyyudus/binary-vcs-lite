@@ -41,7 +41,7 @@ class State(object):
     Methods:
         set_previous(state)
         set_next(state)
-        update(workspace_hash, session_list, data)
+        update(workspace_hash, session_list, data, save=True)
         save()
         load()
 
@@ -111,12 +111,13 @@ class State(object):
         """
         pass
 
-    def update(self, workspace_hash, session_list, data):
+    def update(self, workspace_hash, session_list, data, save=True):
         """
         Args:
             workspace_hash (WorkspaceHash):
             session_list (list of str):
             data (dict):
+            save (bool, True by default):
         """
         pass
 

@@ -139,7 +139,7 @@ def batch_copy(path_pair, overwrite=0, verbose=0):
 def load_json(json_path, verbose=0):
     """
     Args:
-        json_path (str or Path):
+        json_path (str|Path):
 
     """
 
@@ -158,10 +158,11 @@ def load_json(json_path, verbose=0):
 def save_json(data, json_path, verbose=0):
     """
     Args:
-        json_path (str or Path):
+        json_path (str|Path):
 
     """
 
+    json_path = Path(json_path)
     if not json_path.parent.exists():
         json_path.parent.mkdir(parents=1)
     with open(str(json_path), 'w') as f:

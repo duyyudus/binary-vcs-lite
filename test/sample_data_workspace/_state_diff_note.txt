@@ -1,0 +1,46 @@
+2 to 1
+	added
+		medRes/textures/tex_1.tif
+		medRes/textures/tex_2.tif
+	modified
+		medRes/asset.ma
+
+3 to 2
+	modified
+		medRes/textures/tex_1.tif
+		medRes/textures/tex_2.tif
+
+4 to 3
+ 	added
+		medRes/textures/tex_3.tif
+	modified
+		medRes/textures/tex_1.tif
+
+5 to 4 
+ 	added
+		medRes/textures/tex_4.tif
+	deleted ( but do not count because we use add only here )
+		medRes/textures/tex_1.tif
+		medRes/textures/tex_2.tif
+
+6 to 5
+	modified
+		medRes/textures/tex_3.tif
+	renamed
+		medRes/textures/tex_2_new_name.tif <- medRes/textures/tex_2.tif
+	deleted
+		medRes/textures/tex_1.tif
+
+7 to 6
+	added
+		medRes/textures/tex_1.tif
+	modified
+		medRes/asset.rig.ma
+
+last to 7
+	added
+		medRes/old/asset.ma
+	modified
+		medRes/asset.ma
+	renamed
+		medRes/textures/tex_3_new_name.tif

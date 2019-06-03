@@ -1,0 +1,28 @@
+{
+    "revision": {
+        "1": "s4",
+        "2": "s6"
+    },
+    "detail_version": {
+        "1": {
+            "medRes/asset.ma": 1,
+            "medRes/asset.rig.ma": 1,
+            "medRes/textures/tex_1.tif": 1,
+            "medRes/textures/tex_2.tif": 1,
+            "medRes/textures/tex_3.tif": 1,
+            "medRes/textures/tex_4.tif": 1,
+            "proxyRes/asset.ma": 1,
+            "proxyRes/asset.rig.ma": 1
+        },
+        "2": {
+            "medRes/asset.ma": 1,
+            "medRes/asset.rig.ma": 2,
+            "medRes/textures/tex_1.tif": 1,
+            "medRes/textures/tex_2_new_name.tif": 1,
+            "medRes/textures/tex_3.tif": 2,
+            "medRes/textures/tex_4.tif": 1,
+            "proxyRes/asset.ma": 1,
+            "proxyRes/asset.rig.ma": 1
+        }
+    }
+}

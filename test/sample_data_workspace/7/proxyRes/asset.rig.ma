@@ -1,1 +1,1 @@
-asset proxy rig
+proxyres asset rig 1

@@ -1,1 +1,1 @@
-asset ver 5
+medres asset 2

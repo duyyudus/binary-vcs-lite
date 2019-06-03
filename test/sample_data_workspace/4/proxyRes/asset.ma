@@ -1,1 +1,1 @@
-asset proxy new ver 2
+proxyres asset 1

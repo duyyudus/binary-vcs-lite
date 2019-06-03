@@ -1,0 +1,1 @@
+proxyres asset 1

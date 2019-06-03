@@ -25,6 +25,7 @@ class Repo(object):
         _repo_dir (Path):
         _deep_dir (Path):
         _repo_id (Path):
+        _metadata_path (Path):
         _blob_dir (Path):
         _session_dir (Path):
         _state_dir (Path):
@@ -36,6 +37,7 @@ class Repo(object):
         repo_dir (Path):
         deep_dir (Path):
         repo_id (str):
+        metadata_path (Path):
 
     Methods:
         state_in(target_wh,
@@ -77,7 +79,7 @@ class Repo(object):
     @property
     def repo_id(self):
         """str: """
-        pass
+        return self._repo_id
 
     def state_in(self,
                  target_wh,
@@ -94,6 +96,8 @@ class Repo(object):
             current_session_id (str):
             current_revision (int):
             add_only (bool):
+        Returns:
+            bool:
         """
         pass
 
@@ -104,6 +108,8 @@ class Repo(object):
             session_id (str):
             revision (int):
             overwrite (bool):
+        Returns:
+            bool:
         """
         pass
 

@@ -1,1 +1,1 @@
-asset rig ver 3
+medres asset rig 2
