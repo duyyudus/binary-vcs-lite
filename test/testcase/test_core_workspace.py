@@ -13,6 +13,17 @@ class TestWorkspace(unittest.TestCase):
         self.output_workspace_deep_dir = self.output_vcs_dir.joinpath(
             WORKSPACE['FOLDER']
         )
+        self.workspace_files = [
+            'medRes/asset.ma',
+            'medRes/asset.rig.ma',
+            'medRes/old/asset.ma',
+            'medRes/textures/tex_1.tif',
+            'medRes/textures/tex_2_new_name.tif',
+            'medRes/textures/tex_2_new_name.tif',
+            'medRes/textures/tex_4.tif',
+            'proxyRes/asset.ma',
+            'proxyRes/asset.rig.ma',
+        ]
 
     def setUp(self):
         create_output_workspace_dir()
@@ -21,6 +32,7 @@ class TestWorkspace(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
+        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
         ws = Workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, rp, 'review', init=1)
 
@@ -33,6 +45,7 @@ class TestWorkspace(unittest.TestCase):
         self.assertEqual(ws.file_pattern['EXCLUDE'], DEFAULT_FILE_PATTERN['EXCLUDE'])
 
     def test_properties(self):
+        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
         ws = Workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, rp, 'review', init=1)
         self.assertIs(ws.file_pattern, ws._file_pattern)
@@ -41,34 +54,39 @@ class TestWorkspace(unittest.TestCase):
         self.assertIs(ws.session_id, ws._session_id)
         self.assertIs(ws.revision, ws._revision)
 
-        files = [
-            'medRes/asset.ma',
-            'medRes/asset.rig.ma',
-            'medRes/old/asset.ma',
-            'medRes/textures/tex_1.tif',
-            'medRes/textures/tex_2_new_name.tif',
-            'medRes/textures/tex_3.tif',
-            'medRes/textures/tex_4.tif',
-            'proxyRes/asset.ma',
-            'proxyRes/asset.rig.ma',
-        ]
-        for f in files:
+        for f in self.workspace_files:
             self.assertIn(f, ws.workspace_hash)
 
-    def test_workspace_operations(self):
+    def test_operations(self):
+        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
+
+        # Test commit() on "review" session
         ws = Workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, rp, 'review', init=1)
         ws.commit(['review'], data={}, add_only=0, fast_forward=0)
         self.assertIs(ws.revision, 1)
         ws.commit(['review', 'publish'], data={}, add_only=0, fast_forward=0)
         self.assertIs(ws.revision, 2)
 
+        # Test detail_file_version() on "publish" session
         ws = Workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, rp, 'publish', init=0)
         self.assertIs(ws.revision, 1)
-
-        self.assertEqual(set(list(ws.all_session)), set(list(['review', 'publish'])))
         self.assertEqual(ws.latest_revision('review'), 2)
         self.assertEqual(ws.latest_revision('publish'), 1)
+        self.assertEqual(ws.all_revision('review'), [1, 2])
+        self.assertEqual(ws.all_revision('publish'), [1])
+        self.assertEqual(set(list(ws.all_session)), set(list(['review', 'publish'])))
+
+        file_versions = ws.detail_file_version('publish', 1)
+        self.assertGreater(len(file_versions), 0)
+        for k in file_versions:
+            self.assertEqual(file_versions[k], 1)
+
+        # Test checkout()
+        shutil.rmtree(TEST_OUTPUT_DATA_WORKSPACE_DIR)
+        ws.checkout('review', 2)
+        for f in self.workspace_files:
+            self.assertIn(f, ws.workspace_hash)
 
 
 @log_test(__file__)

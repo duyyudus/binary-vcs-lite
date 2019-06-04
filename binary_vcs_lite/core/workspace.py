@@ -73,12 +73,12 @@ class Workspace(object):
 
     @property
     def session_id(self):
-        """str: """
+        """str: ID of current session."""
         return self._session_id
 
     @property
     def revision(self):
-        """int: """
+        """int: current revision of `self.session_id`."""
         return self._revision
 
     @property
@@ -127,7 +127,7 @@ class Workspace(object):
         """
         Args:
             session_id (str):
-            revision (int|str):
+            revision (int):
             checkout_dir (Path, None by default):
             overwrite (bool, False by default):
         """

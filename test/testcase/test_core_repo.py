@@ -30,6 +30,7 @@ class TestRepo(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
+        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
 
         self.assertTrue(check_type(rp.repo_id, [str]))
@@ -59,12 +60,14 @@ class TestRepo(unittest.TestCase):
             self.assertTrue(check_type(e, [repo.RepoNotFound]))
 
     def test_properties(self):
+        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
         self.assertIs(rp.repo_dir, rp._repo_dir)
         self.assertIs(rp.deep_dir, rp._deep_dir)
         self.assertIs(rp.repo_id, rp._repo_id)
 
-    def test_repo_operations(self):
+    def test_operations(self):
+        log_info()
         sample_workspace_list_dir = Path(TEST_SAMPLE_DATA_WORKSPACE_DIR).parent
         current_workspace_dir = Path(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         workspace_list = [1, 2, 3, 4, 5, 6, 7]

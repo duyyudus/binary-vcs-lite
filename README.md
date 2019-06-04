@@ -6,27 +6,31 @@ It is designed for versioning asset data in game/3D/VFX industry, in a simple wa
 
 Hopefully, it can make life easier for TA/TD, without using huge version control system like  Perforce.
 
+*Please look at `docs/design.png` for specifications.*
+
 ## Target features
 
 ### Supported state-diff types between 2 arbitrary states
 
-*Managed by `core.repo.Repo` using `core.state.State` and `core.state.StateChain`*
+*Managed by `core.repo.Repo` using  `core.state_chain.StateChain`*
 
-* `Added`
+* `added`
 
-* `Removed`
+* `deleted`
 
-* `Modified`
+* `modified`
 
-* `Unchanged`
+* `unchanged`
 
-* `Renamed`
+* `renamed`
 
-* `Moved`
+* `moved`
+
+* `copied`
 
 ### Versioning session
 
-*Managed by `core.repo.Repo` using `core.session.Session`*
+*Managed by `core.repo.Repo` using `core.session_manager.SessionManager`*
 
 Work on top of `StateChain`, provide a filter-like mechanism to derive a discontinuous sub-chain from main `StateChain` for different working purposes
 
@@ -34,13 +38,11 @@ Work on top of `StateChain`, provide a filter-like mechanism to derive a discont
 
 *Managed by `core.repo.Repo` using `core.state.State` and `core.state.StateChain`*
 
-* `EXHAUSTIVE` ( commit all diff types )
+* `EXHAUSTIVE` ( default mode, commit all diff types )
 
-* `ADDITIVE` ( commit only `Added`, `Modified`, `Unchanged` diff )
+* `ADDITIVE` ( also known as `add_only`, commit only `Added`, `Modified`, `Unchanged` diff )
 
 New `State` to be added to `StateChain` is derived differently from `WorkspaceHash` depend on commit modes
-
-* In detail, `StateChain` interprets `WorkspaceHash` in `EXHAUSTIVE` or `ADDITIVE` mode, then create a new `State` from interpreted data
 
 Diff calculation process between two `State` objects is always exhaustive
 
@@ -52,9 +54,9 @@ Any folder with sub-hierarchy `VCS_FOLDER/WORKSPACE_FOLDER`
 
 `VCS_FOLDER` and `WORKSPACE_FOLDER` can be customized in `./common/config.yml`
 
-Example: We have `../sample_data/last/.vcs_lite/.workspace`
+Example: We have `../output_data/last/.vcs_lite/.workspace`
 
-- In this case, `../sample_data/last` is a valid workspace
+* In this case, `../output_data/last` is a valid workspace
 
 ### `repo`
 
@@ -62,29 +64,39 @@ Any folder with sub-hierarchy `VCS_FOLDER/REPO_FOLDER`
 
 `VCS_FOLDER` and `REPO_FOLDER` can be customized in `./common/config.yml`
 
-Example: We have `../sample_data/last/.vcs_lite/.repo`
+Example: We have `../output_data/last/.vcs_lite/.repo`
 
-- In this case, `../sample_data/last` is also a valid repo
+* In this case, `../output_data/last` is also a valid repo
 
 **`repo` and `workspace` can be the same folder**
 
 ### `vcs_interface`
 
-Users are supposed to use this to interact with `workspace` and `repo`
+The main class is `vsc_interface.VersioningInterface`. Users are supposed to use it to interact with `workspace` and `repo`
 
-Two main working scenarios
+With 2 subclasses of `VersioningInterface`, we have two working scenarios
 
-* `LocalWorking`
+* `LocalVersioning`
 
     `workspace` and `repo` at the same location
 
-* `RemoteWorking`
+* `RemoteVersioning`
 
     `workspace` and `repo` at the different locations
 
 ## Detail
 
+### `workspace` components
+
+* `METADATA`
+
+    It is just the file `VCS_FOLDER/WORKSPACE_FOLDER/METADATA`, store record of all repositories that workspace connected to.
+
 ### `repo` components
+
+* `METADATA`
+
+    It is just the file `VCS_FOLDER/REPO_FOLDER/METADATA`, store ID of the repo.
 
 * `blob`
 
@@ -95,7 +107,7 @@ Two main working scenarios
 * `state`
 
     Folder with sub-hierarchy `VCS_FOLDER/REPO_FOLDER/STATE_FOLDER`
-    
+
     Manage states of workspace/working directory
 
     Skeleton for versioning mechanism

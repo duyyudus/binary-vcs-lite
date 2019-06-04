@@ -24,11 +24,12 @@ class VersioningInterface(object):
         detail_file_version(session_id, revision, relative_path)
     """
 
-    def __init__(self, workspace_dir, repo_dir, init_workspace, init_repo):
+    def __init__(self, workspace_dir, repo_dir, session_id, init_workspace, init_repo):
         """
         Args:
             workspace_dir (str|Path):
             repo_dir (str|Path):
+            session_id (str):
             init_workspace (bool):
             init_repo (bool):
         """
@@ -121,9 +122,14 @@ class LocalVersioning(VersioningInterface):
 
     """
 
-    def __init__(self, workspace_dir):
+    def __init__(self, workspace_dir, session_id):
+        """
+        Args:
+            workspace_dir (str|Path):
+            session_id (str):
+        """
         super(LocalVersioning, self).__init__(
-            workspace_dir, workspace_dir, init_workspace=1, init_repo=1
+            workspace_dir, workspace_dir, session_id, init_workspace=1, init_repo=1
         )
 
 
@@ -132,7 +138,13 @@ class RemoteVersioning(VersioningInterface):
 
     """
 
-    def __init__(self, workspace_dir, repo_dir):
+    def __init__(self, workspace_dir, repo_dir, session_id):
+        """
+        Args:
+            workspace_dir (str|Path):
+            repo_dir (str|Path):
+            session_id (str):
+        """
         super(RemoteVersioning, self).__init__(
-            workspace_dir, repo_dir, init_workspace=1, init_repo=1
+            workspace_dir, repo_dir, session_id, init_workspace=1, init_repo=1
         )

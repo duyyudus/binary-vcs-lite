@@ -1,4 +1,5 @@
 from binary_vcs_lite.common.util import *
+from binary_vcs_lite.common.hashing import WorkspaceHash
 
 
 class Blob(object):
@@ -29,6 +30,7 @@ class Blob(object):
             blob_dir (str|Path): A folder store blob data
 
         """
+        check_type(blob_dir, [str, Path])
 
         super(Blob, self).__init__()
         self._blob_dir = Path(blob_dir)
@@ -60,6 +62,7 @@ class Blob(object):
             list of str:
 
         """
+        check_type(workspace_hash, [WorkspaceHash])
 
         log_info('Preparing to store blob...')
 
@@ -90,6 +93,7 @@ class Blob(object):
             list of str:
 
         """
+        check_type(workspace_hash, [WorkspaceHash])
 
         log_info('Preparing to extract blob...')
 

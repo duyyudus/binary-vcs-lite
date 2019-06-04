@@ -152,6 +152,7 @@ class TestStateTree(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
+        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         state_tree = StateTree(workspace_hash)
         for v in workspace_hash.values():
