@@ -41,7 +41,8 @@ class TestWorkspaceHash(unittest.TestCase):
                     # '.jpg$',
                     # '.tx$'
                 ]
-            }
+            },
+            verbose=1
         )
 
         return workspace_hash
@@ -82,6 +83,7 @@ class TestWorkspaceHash(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    switch_log_vcs(0)
     testcase_classes = [
         TestWorkspaceHash,
     ]

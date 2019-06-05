@@ -103,17 +103,53 @@ def match_regex_pattern(input_str, patterns):
 
 
 def copy_file(source, target, overwrite=0, verbose=0):
-    """`source` and `target` will be converted to `str`."""
+    """Copy file and return result code.
+
+    `source` and `target` will be converted to `str`.
+
+    Args:
+        source (str|Path):
+        target (str|Path):
+    Returns:
+        bool:
+    """
 
     source = str(source)
     target = str(target)
 
     if not Path(target).parent.exists():
-        Path(target).parent.mkdir(parents=1)
+        try:
+            Path(target).parent.mkdir(parents=1)
+        except Exception as e:
+            if verbose:
+                log_info('Copy mkdir error: {}'.format(target))
+                log_info('----{}'.format(str(e)))
+            return 0
+
     if overwrite and Path(target).exists():
-        os.remove(target)
-    if not Path(target).exists():
-        shutil.copyfile(source, target)
+        try:
+            os.remove(target)
+        except Exception as e:
+            if verbose:
+                log_info('Copy overwrite error: {}'.format(target))
+                log_info('----{}'.format(str(e)))
+            return 0
+
+    if Path(target).exists():
+        return 1
+    else:
+        try:
+            shutil.copyfile(source, target)
+        except Exception as e:
+            if Path(target).exists():
+                try:
+                    os.remove(target)
+                except Exception as e:
+                    pass
+            if verbose:
+                log_info('Copy error: {}'.format(target))
+                log_info('----{}'.format(str(e)))
+            return 0
         if verbose:
             log_info('Copied: {}'.format(target))
         return 1

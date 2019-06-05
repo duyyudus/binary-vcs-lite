@@ -81,10 +81,24 @@ def _hash_sha(filepath, buff_size=65536):
 
 
 def hash_file(filepath):
-    return _hash_sha(filepath)
+    """
+    Args:
+        filepath (str|Path):
+    Returns:
+        str:
+    """
+    check_type(filepath, [str, Path])
+    return _hash_sha(str(filepath))
 
 
 def hash_str(input_str):
+    """
+    Args:
+        input_str (str):
+    Returns:
+        str:
+    """
+    check_type(input_str, [str])
     sha = hashlib.sha1()
     sha.update(input_str.encode('ascii'))
     return sha.hexdigest()
@@ -99,16 +113,22 @@ def hash_workspace(workspace_dir,
     This is the only way to create a new `WorkspaceHash` instance.
 
     Args:
-        workspace_dir (str or Path): Path to working directory
-        include_pattern (list of str): Glob pattern for globbing files in `workspace_dir`
-            Must be defined relatively from `workspace_dir`
-        exclude_pattern (list of str): Regex pattern for filtering out files in `workspace_dir`
-            It will override `include_pattern`
+        workspace_dir (str|Path): Path to working directory
+        file_pattern (dict): contain INCLUDE and EXCLUDE pattern
+            INCLUDE
+                Glob pattern for globbing files in `workspace_dir`
+                Must be defined relatively from `workspace_dir`
+            EXCLUDE
+                Regex pattern for filtering out files in `workspace_dir`
+                It will override `include_pattern`
 
     Returns:
         common.hashing.WorkspaceHash:
 
     """
+    check_type(workspace_dir, [str, Path])
+    check_type(file_pattern, [dict])
+
     log_info('Hashing workspace: {}'.format(str(workspace_dir)))
 
     # Need this in case None is passed into pattern value
@@ -128,7 +148,7 @@ def hash_workspace(workspace_dir,
             continue
         try:
             rel_path = p.relative_to(workspace_dir)
-            hash_data = hash_file(str(p))
+            hash_data = hash_file(p)
             if verbose:
                 log_info('{}: {}'.format(str(p), hash_data))
             workspace_hash[rel_path.as_posix()] = {

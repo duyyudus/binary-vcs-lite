@@ -42,6 +42,7 @@ class TestBlob(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    switch_log_vcs(0)
     testcase_classes = [
         TestBlob,
     ]

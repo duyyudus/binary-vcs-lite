@@ -1,5 +1,8 @@
 from binary_vcs_lite.common.util import *
-from binary_vcs_lite.common.hashing import WorkspaceHash
+from binary_vcs_lite.common.hashing import (
+    WorkspaceHash,
+    hash_file
+)
 
 
 class Blob(object):
@@ -103,6 +106,8 @@ class Blob(object):
             blob_file = self._blob_dir.joinpath(sub_folder, blob_name)
             workspace_file = Path(v[WORKSPACE_HASH['ABSOLUTE_PATH_KEY']])
             if blob_file.exists():
+                if hash_file(blob_file) != v[WORKSPACE_HASH['HASH_KEY']]:
+                    continue
                 path_pair.append((blob_file, workspace_file))
                 if verbose:
                     log_info('Extracted blob: {}/{}'.format(
