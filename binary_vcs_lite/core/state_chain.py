@@ -1,4 +1,8 @@
+from tree_util_lite.core import diff_engine
+from tree_util_lite.diff_interpreter import binary_vcs_diff
+
 from binary_vcs_lite.common.util import *
+from binary_vcs_lite.common.hashing import WorkspaceHash
 from .state import State
 
 
@@ -40,6 +44,17 @@ class StateChain(object):
         """
 
         super(StateChain, self).__init__()
+        check_type(state_dir, [str, Path])
+
+        state_dir = Path(state_dir)
+        if not state_dir.exists():
+            raise InvalidRepoState()
+
+        self._state_dir = state_dir
+        self._all_state_id = []
+        self._state_data = {}
+        for f in state_dir.iterdir():
+            self.load_state(f)
 
     def _reset(self):
         """For unit test only."""
@@ -64,7 +79,9 @@ class StateChain(object):
     @property
     def last_state(self):
         """State: """
-        pass
+        if not self.all_state_id:
+            return None
+        return self._state_data[self.all_state_id[-1]]
 
     def load_state(self, state_file):
         """
@@ -73,7 +90,23 @@ class StateChain(object):
         Raises:
             InvalidState:
         """
-        pass
+        check_type(state_file, [str, Path])
+
+        state_file = Path(state_file)
+        if state_file.parent != self._state_dir:
+            raise InvalidState()
+
+        s = State(state_file)
+        if not s.load():
+            raise InvalidState()
+
+        if self.last_state:
+            self.last_state.set_next(s)
+
+        if s.state_id not in self._state_data:
+            self._state_data[s.state_id] = s
+        if s.state_id not in self._all_state_id:
+            self._all_state_id.append(s.state_id)
 
     def new_state(self, workspace_hash, session_list, data, save=True):
         """
@@ -86,13 +119,33 @@ class StateChain(object):
         Returns:
             State:
         """
-        pass
+        check_type(workspace_hash, [WorkspaceHash])
+        check_type(session_list, [list])
+        check_type(data, [dict])
 
-    def compare_state(self, s1, s2):
+        if self.all_state_id:
+            state_id = 's' + str(int(self.all_state_id[-1][1:]) + 1)
+        else:
+            state_id = 's0'
+        state_file = self._state_dir.joinpath(state_id)
+        s = State(state_file)
+        s.update(workspace_hash, session_list, data, save)
+
+        if self.last_state:
+            self.last_state.set_next(s)
+
+        if s.state_id not in self._state_data:
+            self._state_data[s.state_id] = s
+        if s.state_id not in self._all_state_id:
+            self._all_state_id.append(s.state_id)
+        return s
+
+    def compare_state(self, s1, s2, return_path):
         """
         Args:
             s1 (State):
             s2 (State):
+            return_path (bool): return diff data as paths or `tree_util_lite.core.tree.Node`
 
         Returns:
             dict: diff data in below format
@@ -107,4 +160,10 @@ class StateChain(object):
                 }
 
         """
-        pass
+        check_type(s1, [State])
+        check_type(s2, [State])
+
+        differ = diff_engine.DiffEngine(s1.state_tree, s2.state_tree)
+        differ.compute_edit_sequence(show_matrix=0, show_edit=0)
+        diff_data = differ.postprocess_edit_sequence(return_path=0, show_diff=0)
+        return binary_vcs_diff.interpret(diff_data, return_path=return_path, show_diff=0)

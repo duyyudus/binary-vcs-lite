@@ -20,7 +20,7 @@ _log_on = 1
 class VcsLiteError(Exception):
     """Base error for version control operations."""
 
-    def __init__(self, message):
+    def __init__(self, message=''):
         super(VcsLiteError, self).__init__()
         self._message = message
         log_error('{}'.format(message))

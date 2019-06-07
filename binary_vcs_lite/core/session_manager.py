@@ -1,5 +1,6 @@
 from binary_vcs_lite.common.util import *
 from .session import Session
+from .state_chain import StateChain
 
 
 class SessionNotFound(VcsLiteError):
@@ -54,6 +55,21 @@ class SessionManager(object):
             MissingStateChain:
         """
         super(SessionManager, self).__init__()
+        check_type(session_dir, [str, Path])
+
+        session_dir = Path(session_dir)
+        if not session_dir.exists():
+            raise InvalidRepoSession()
+        self._session_dir = session_dir
+        self._all_session_id = []
+        self._session_data = {}
+
+        if check_type(state_chain, [StateChain], raise_exception=0):
+            self._state_chain = state_chain
+        else:
+            raise MissingStateChain()
+        for f in session_dir.iterdir():
+            self.load_session(f)
 
     def _reset(self):
         """For unit test only."""
@@ -82,7 +98,18 @@ class SessionManager(object):
         Raises:
             InvalidSession:
         """
-        pass
+        check_type(session_file, [str, Path])
+
+        session_file = Path(session_file)
+        if session_file.parent != self._session_dir:
+            raise InvalidSession()
+        sess = Session(session_file)
+        if not sess.load():
+            raise InvalidSession()
+        if sess.session_id not in self._session_data:
+            self._session_data[sess.session_id] = sess
+        if sess.session_id not in self._all_session_id:
+            self._all_session_id.append(sess.session_id)
 
     def new_session(self, session_id):
         """
@@ -93,14 +120,32 @@ class SessionManager(object):
         Returns:
             Session:
         """
-        pass
+        check_type(session_id, [str])
+
+        if session_id in self._session_data:
+            raise ClashingSession()
+
+        session_file = self._session_dir.joinpath(session_id)
+        sess = Session(session_file)
+        sess.sync_from_state_chain(self._state_chain)
+        if sess.session_id not in self._session_data:
+            self._session_data[sess.session_id] = sess
+        if session_id not in self._all_session_id:
+            self._all_session_id.append(session_id)
+        return sess
 
     def update_session(self, session_id):
         """
         Args:
             session_id (str):
         """
-        pass
+        check_type(session_id, [str])
+
+        if session_id not in self._session_data:
+            self.new_session(session_id)
+        else:
+            sess = self._session_data[session_id]
+            sess.sync_from_state_chain(self._state_chain)
 
     def detail_file_version(self, session_id, revision=None, relative_path=None):
         """
@@ -113,4 +158,11 @@ class SessionManager(object):
         Returns:
             dict:
         """
-        pass
+        check_type(session_id, [str])
+        check_type(revision, [int, type(None)])
+        check_type(relative_path, [str, Path, type(None)])
+
+        if session_id not in self._session_data:
+            raise SessionNotFound()
+        sess = self._session_data[session_id]
+        return sess.detail_file_version(revision, relative_path)

@@ -1,6 +1,7 @@
 import hashlib
 from .util import *
 from .config import *
+from tree_util_lite.core import tree
 
 
 class WorkspaceHash(dict):
@@ -163,3 +164,20 @@ def hash_workspace(workspace_dir,
     workspace_hash.set_workspace_dir(workspace_dir)
     log_info('Hashing completed')
     return workspace_hash
+
+
+def workspace_hash_from_paths(paths):
+    """
+    Args:
+        paths (list of str): paths with data as suffix
+    Returns:
+        WorkspaceHash
+    """
+    ws = WorkspaceHash(None)
+    for p in paths:
+        p, d = tree.separate_path_data(p)
+        ws[p] = {
+            WORKSPACE_HASH['HASH_KEY']: d,
+            WORKSPACE_HASH['RELATIVE_PATH_KEY']: p
+        }
+    return ws

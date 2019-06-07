@@ -1,5 +1,5 @@
 from _setup_test import *
-StateChain = state.StateChain
+StateChain = state_chain.StateChain
 
 
 class TestStateChain(unittest.TestCase):

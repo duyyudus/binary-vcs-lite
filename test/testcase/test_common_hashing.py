@@ -80,6 +80,20 @@ class TestWorkspaceHash(unittest.TestCase):
             real_abs_path = Path(v[WORKSPACE_HASH['ABSOLUTE_PATH_KEY']])
             self.assertEqual(valid_abs_path.as_posix(), real_abs_path.as_posix())
 
+    def test_workspace_hash_from_path(self):
+        paths = [
+            'some/path1/_dx_hash1',
+            'some/path2/_dx_hash2',
+        ]
+        ws = hashing.workspace_hash_from_paths(paths)
+        valid_data = {
+            'some/path1': 'hash1',
+            'some/path2': 'hash2',
+        }
+        for k in ws:
+            ws_hash = ws[k][WORKSPACE_HASH['HASH_KEY']]
+            self.assertEqual(valid_data[k], ws_hash)
+
 
 @log_test(__file__)
 def run():
