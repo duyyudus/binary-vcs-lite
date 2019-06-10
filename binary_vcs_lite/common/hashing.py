@@ -28,6 +28,14 @@ class WorkspaceHash(dict):
     Attributes:
         _workspace_dir (Path):
 
+    Properties:
+        workspace_dir (Path):
+
+    Methods:
+        set_workspace_dir(target_dir)
+        update_abs_path()
+        hash_to_path(hash_value)
+        ls_path_with_hash()
     """
 
     def __init__(self, workspace_dir):
@@ -69,6 +77,25 @@ class WorkspaceHash(dict):
         for file_id in self:
             if hash_value == self[file_id][WORKSPACE_HASH['HASH_KEY']]:
                 return self[file_id][WORKSPACE_HASH['RELATIVE_PATH_KEY']]
+
+    def ls_path_with_hash(self):
+        """Return a list of path with data as suffix
+
+        Example:
+            [
+                'path/to/file1/_dx_000001',
+                'path/to/file2/_dx_000002',
+                ...
+            ]
+
+        Returns:
+            list of str
+        """
+        ret = []
+        for k in self:
+            p = tree.path_with_data(k, self[k][WORKSPACE_HASH['HASH_KEY']])
+            ret.append(p)
+        return ret
 
 
 def _hash_sha(filepath, buff_size=65536):
@@ -171,8 +198,10 @@ def workspace_hash_from_paths(paths):
     Args:
         paths (list of str): paths with data as suffix
     Returns:
-        WorkspaceHash
+        WorkspaceHash:
     """
+    check_type(paths, [list])
+
     ws = WorkspaceHash(None)
     for p in paths:
         p, d = tree.separate_path_data(p)

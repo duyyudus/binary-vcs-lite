@@ -18,7 +18,7 @@ class TestBlob(unittest.TestCase):
         b = blob.Blob(
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
         )
-        results = b.store_blob(workspace_hash, verbose=1)
+        results = b.store(workspace_hash, verbose=1)
 
         self.assertGreater(len(results), 0)
         for p in results:
@@ -30,10 +30,10 @@ class TestBlob(unittest.TestCase):
         b = blob.Blob(
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
         )
-        b.store_blob(workspace_hash)
+        b.store(workspace_hash)
         cleanup_output_workspace_dir()
 
-        results = b.extract_blob(workspace_hash, verbose=1)
+        results = b.extract(workspace_hash, verbose=1)
 
         self.assertGreater(len(results), 0)
         for p in results:

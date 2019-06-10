@@ -52,7 +52,7 @@ class TestSession(unittest.TestCase):
         self.assertEqual(sess.session_id, self.sample_session_file.name)
         self.assertEqual(sess.session_file, self.sample_session_file)
         self.assertGreater(len(sess.revision_data), 0)
-        self.assertGreater(len(sess._detail_file_version), 0)
+        self.assertGreater(len(sess._detail_version_data), 0)
 
     def test_sync_from_state_chain_and_save(self):
         log_info()
@@ -112,7 +112,8 @@ class TestSession(unittest.TestCase):
                 valid_detail_version_data[rev]
             )
 
-        for p in valid_revision_data['1']:
+        for p in valid_detail_version_data['1']:
+            log_info(p)
             self.assertEqual(
                 sess.detail_file_version(1, relative_path=p),
                 {p: valid_detail_version_data['1'][p]}
@@ -126,6 +127,7 @@ class TestSession(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    switch_log_vcs(1)
     testcase_classes = [
         TestSession,
     ]

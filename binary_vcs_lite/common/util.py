@@ -5,6 +5,7 @@ import time
 import json
 import re
 import shutil
+import copy
 from pprint import pformat
 
 if sys.version_info[0] == 3:
@@ -219,10 +220,17 @@ def check_type(obj, types, raise_exception=1):
         bool:
     """
 
+    if str in types and sys.version_info[0] == 2:
+        types.append(unicode)
+
     if isinstance(obj, tuple(types)):
         return 1
     elif raise_exception:
-        msg = '"{}" must be an instance of ({})'.format(str(obj), ', '.join([str(t) for t in types]))
+        msg = '"{}" ({}) must be an instance of ({})'.format(
+            str(obj),
+            type(obj),
+            ', '.join([str(t) for t in types])
+        )
         raise InvalidType(msg)
     else:
         return 0

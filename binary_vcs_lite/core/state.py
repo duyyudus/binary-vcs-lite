@@ -1,4 +1,6 @@
 from binary_vcs_lite.common.util import *
+from binary_vcs_lite.common.hashing import WorkspaceHash
+from binary_vcs_lite.common import hashing
 from tree_util_lite.core.tree import Tree
 
 
@@ -13,6 +15,7 @@ class StateTree(Tree):
             workspace_hash (WorkspaceHash):
         """
         super(StateTree, self).__init__('state_tree', 'state_root')
+        self.build_tree(workspace_hash.ls_path_with_hash())
 
 
 class State(object):
@@ -55,7 +58,20 @@ class State(object):
         """
 
         super(State, self).__init__()
-        self._state_file = Path(state_file)
+        check_type(state_file, [str, Path])
+
+        state_file = Path(state_file)
+
+        self._state_file = state_file
+        self._state_id = self._state_file.name
+        self._state_tree = None
+        self._timestamp = str(int(time.time()))
+        self._session_list = []
+        self._data = {}
+        self._previous = None
+        self._next = None
+        if self._state_file.exists():
+            self.load()
 
     @property
     def state_id(self):
@@ -102,14 +118,20 @@ class State(object):
         Args:
             target_state (State):
         """
-        pass
+        check_type(target_state, [State])
+        self._previous = target_state
+        if not target_state.next:
+            target_state.set_next(self)
 
     def set_next(self, target_state):
         """
         Args:
             target_state (State):
         """
-        pass
+        check_type(target_state, [State])
+        self._next = target_state
+        if not target_state.previous:
+            target_state.set_previous(self)
 
     def update(self, workspace_hash, session_list, data, save=True):
         """
@@ -119,10 +141,62 @@ class State(object):
             data (dict):
             save (bool, True by default):
         """
-        pass
+        check_type(workspace_hash, [WorkspaceHash])
+        check_type(session_list, [list])
+        check_type(data, [dict])
+
+        self._state_tree = StateTree(workspace_hash)
+        self._timestamp = str(int(time.time()))
+        self._session_list = session_list
+        self._data = data
+        if save:
+            self.save()
 
     def save(self):
-        pass
+        """Save state attributes to state file.
+
+        Returns:
+            bool:
+        """
+        file_key = STATE['CONTENT']['FILE_KEY']
+        timestamp_key = STATE['CONTENT']['TIMESTAMP_KEY']
+        session_list_key = STATE['CONTENT']['SESSION_LIST_KEY']
+        data_key = STATE['CONTENT']['DATA_KEY']
+
+        data = {
+            file_key: self._state_tree.ls_all_leaves(relative=1),
+            timestamp_key: self._timestamp,
+            session_list_key: self._session_list,
+            data_key: self._data
+        }
+        save_json(data, self._state_file)
+        return True
 
     def load(self):
-        pass
+        """Load state attributes to state file.
+
+        Returns:
+            bool:
+        """
+        file_key = STATE['CONTENT']['FILE_KEY']
+        timestamp_key = STATE['CONTENT']['TIMESTAMP_KEY']
+        session_list_key = STATE['CONTENT']['SESSION_LIST_KEY']
+        data_key = STATE['CONTENT']['DATA_KEY']
+
+        data = load_json(self._state_file)
+        workspace_hash = hashing.workspace_hash_from_paths(data[file_key])
+
+        self._state_tree = StateTree(workspace_hash)
+        self._timestamp = data[timestamp_key]
+        self._session_list = data[session_list_key]
+        self._data = data[data_key]
+        return True
+
+    def to_workspace_hash(self):
+        """Create a new `WorkspaceHash` instance from `self._state_tree`.
+
+        Returns:
+            WorkspaceHash:
+        """
+        paths_with_hash = self._state_tree.ls_all_leaves(relative=1)
+        return hashing.workspace_hash_from_paths(paths_with_hash)

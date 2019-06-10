@@ -1,6 +1,7 @@
 from _setup_test import *
 State = state.State
 StateTree = state.StateTree
+from tree_util_lite.core import tree
 
 
 class TestState(unittest.TestCase):
@@ -138,6 +139,17 @@ class TestState(unittest.TestCase):
         for p in valid_data[STATE['CONTENT']['FILE_KEY']]:
             n = s0.state_tree.search(Path(p).parent.as_posix())
             self.assertGreater(len(n), 0)
+
+    def test_to_workspace_hash(self):
+        log_info()
+
+        s0 = State(self.sample_state_file)
+        valid_data = load_json(self.sample_state_file)
+        real_workspace_hash = s0.to_workspace_hash()
+        for k in valid_data[STATE['CONTENT']['FILE_KEY']]:
+            p, d = tree.separate_path_data(k)
+            self.assertIn(p, real_workspace_hash)
+            self.assertEqual(d, real_workspace_hash[p][WORKSPACE_HASH['HASH_KEY']])
 
 
 class TestStateTree(unittest.TestCase):

@@ -22,8 +22,8 @@ class Blob(object):
         blob_dir (Path):
 
     Methods:
-        store_blob(workspace_hash, verbose=0)
-        extract_blob(workspace_hash, verbose=0)
+        store(workspace_hash, verbose=0)
+        extract(workspace_hash, verbose=0)
 
     """
 
@@ -56,7 +56,7 @@ class Blob(object):
 
         return (hash_value[:2], hash_value[2:])
 
-    def store_blob(self, workspace_hash, verbose=0):
+    def store(self, workspace_hash, verbose=0):
         """Put files in working dir to blob.
 
         Args:
@@ -87,7 +87,7 @@ class Blob(object):
         log_info('Stored all blobs')
         return copied
 
-    def extract_blob(self, workspace_hash, verbose=0):
+    def extract(self, workspace_hash, verbose=0):
         """Extract files from blob to working dir.
 
         Args:

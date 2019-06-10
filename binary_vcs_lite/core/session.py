@@ -88,7 +88,7 @@ class Session(object):
                 state_list.append(state)
 
         for i, state in enumerate(state_list):
-            rev = i + 1
+            rev = str(i + 1)
             if rev not in self._revision_data:
                 self._revision_data[rev] = state.state_id
 
@@ -98,13 +98,13 @@ class Session(object):
             if rev not in self._detail_version_data:
                 pre_rev = str(int(rev) - 1)
                 s2_id = self._revision_data[rev]
-                if rev == 1:
+                if rev == '1':
                     s1_id = s2_id
                 else:
                     s1_id = self._revision_data[pre_rev]
                 s1 = state_chain.state_data[s1_id]
                 s2 = state_chain.state_data[s2_id]
-                state_diff = state_chain.compare_state(s1, s2)
+                state_diff = state_chain.compare_state(s1, s2, return_path=1)
 
                 # Detail file version of previous revision
                 if pre_rev in self._detail_version_data:
@@ -134,9 +134,9 @@ class Session(object):
                         if tmp_rev in self._detail_version_data:
                             if k in self._detail_version_data[tmp_rev]:
                                 # Continue from some version in history
-                                cur_detail_ver[k] = self._detail_version_data[tmp_rev] + 1
+                                cur_detail_ver[k] = self._detail_version_data[tmp_rev][k] + 1
                                 found = 1
-                        tmp_rev -= str(1)
+                        tmp_rev = str(int(tmp_rev) - 1)
 
                     # Added for the first time
                     if not found:
@@ -154,6 +154,7 @@ class Session(object):
         """
         rev_key = SESSION['CONTENT']['REVISION_KEY']
         ver_key = SESSION['CONTENT']['DETAIL_VERSION_KEY']
+        data = {}
         data[rev_key] = self._revision_data
         data[ver_key] = self._detail_version_data
         save_json(data, self._session_file)
@@ -188,9 +189,10 @@ class Session(object):
         check_type(relative_path, [str, Path, type(None)])
 
         revision = revision if revision else self.latest_revision
+        revision = str(revision)
         if revision not in self._detail_version_data:
             raise RevisionNotFound()
-        file_versions = self._detail_version_data[revision]
+        file_versions = copy.deepcopy(self._detail_version_data[revision])
         if relative_path:
             relative_path = str(relative_path)
             for k in list(file_versions):

@@ -148,7 +148,7 @@ class StateChain(object):
             return_path (bool): return diff data as paths or `tree_util_lite.core.tree.Node`
 
         Returns:
-            dict: diff data in below format
+            dict: diff data in below format, all paths are in relative format ( without root )
                 {
                     'added': list,  # Added
                     'deleted': list,  # Deleted

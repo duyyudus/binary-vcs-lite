@@ -4,13 +4,13 @@
 		"relative/path/to/file2/_dx_file200000000000000000000000000000000001",
 		"relative/path/to/file3/_dx_file300000000000000000000000000000000002"
 	],
-	"timestamp": 1000000003,
+	"timestamp": "1000000003",
 	"session_list": [
 		"review",
 		"publish"
 	],
 	"data": {
-		"message": 'this is state 3',
+		"message": "this is state 3",
 		"message_tag": {}
 	}
 }

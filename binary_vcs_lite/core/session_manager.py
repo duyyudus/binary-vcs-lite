@@ -166,3 +166,31 @@ class SessionManager(object):
             raise SessionNotFound()
         sess = self._session_data[session_id]
         return sess.detail_file_version(revision, relative_path)
+
+    def latest_revision(self, session_id):
+        """
+        Args:
+            session_id (str):
+        Raises:
+            SessionNotFound:
+        Returns:
+            int:
+        """
+        if session_id not in self._session_data:
+            raise SessionNotFound()
+
+        return self._session_data[session_id].latest_revision
+
+    def all_revision(self, session_id):
+        """
+        Args:
+            session_id (str):
+        Raises:
+            SessionNotFound:
+        Returns:
+            list of int:
+        """
+        if session_id not in self._session_data:
+            raise SessionNotFound()
+
+        return self._session_data[session_id].all_revision
