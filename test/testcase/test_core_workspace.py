@@ -1,5 +1,6 @@
 from _setup_test import *
 Workspace = workspace.Workspace
+Repo = repo.Repo
 
 
 class TestWorkspace(unittest.TestCase):
@@ -75,7 +76,7 @@ class TestWorkspace(unittest.TestCase):
         self.assertEqual(ws.latest_revision('publish'), 1)
         self.assertEqual(ws.all_revision('review'), [1, 2])
         self.assertEqual(ws.all_revision('publish'), [1])
-        self.assertEqual(set(list(ws.all_session)), set(list(['review', 'publish'])))
+        self.assertEqual(set(ws.all_session()), set(['review', 'publish']))
 
         file_versions = ws.detail_file_version('publish', 1)
         self.assertGreater(len(file_versions), 0)
@@ -83,7 +84,7 @@ class TestWorkspace(unittest.TestCase):
             self.assertEqual(file_versions[k], 1)
 
         # Test checkout()
-        shutil.rmtree(TEST_OUTPUT_DATA_WORKSPACE_DIR)
+        cleanup_output_workspace_dir()
         ws.checkout('review', 2)
         for f in self.workspace_files:
             self.assertIn(f, ws.workspace_hash)
@@ -91,6 +92,7 @@ class TestWorkspace(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    switch_log_vcs(1)
     testcase_classes = [
         TestWorkspace,
     ]

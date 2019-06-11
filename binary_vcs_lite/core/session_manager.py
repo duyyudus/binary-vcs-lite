@@ -168,7 +168,8 @@ class SessionManager(object):
         return sess.detail_file_version(revision, relative_path)
 
     def latest_revision(self, session_id):
-        """
+        """Return 0 if `session_id` does not exist
+
         Args:
             session_id (str):
         Raises:
@@ -177,7 +178,7 @@ class SessionManager(object):
             int:
         """
         if session_id not in self._session_data:
-            raise SessionNotFound()
+            return 0
 
         return self._session_data[session_id].latest_revision
 
@@ -194,3 +195,19 @@ class SessionManager(object):
             raise SessionNotFound()
 
         return self._session_data[session_id].all_revision
+
+    def get_session(self, session_id):
+        """
+        Args:
+            session_id (str):
+        Raises:
+            SessionNotFound:
+        Returns:
+            Session:
+        """
+        check_type(session_id, [str])
+
+        if session_id not in self._session_data:
+            raise SessionNotFound()
+
+        return self._session_data[session_id]

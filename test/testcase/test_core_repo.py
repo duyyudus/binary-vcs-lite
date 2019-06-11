@@ -13,18 +13,19 @@ class TestRepo(unittest.TestCase):
         self.output_repo_deep_dir = self.output_vcs_dir.joinpath(
             REPO['FOLDER']
         )
-        self.output_session_dir = self.output_repo_dir.joinpath(
+        self.output_session_dir = self.output_repo_deep_dir.joinpath(
             SESSION['FOLDER']
         )
-        self.output_state_dir = self.output_repo_dir.joinpath(
+        self.output_state_dir = self.output_repo_deep_dir.joinpath(
             STATE['FOLDER']
         )
-        self.output_blob_dir = self.output_repo_dir.joinpath(
+        self.output_blob_dir = self.output_repo_deep_dir.joinpath(
             BLOB['FOLDER']
         )
 
     def setUp(self):
         create_output_workspace_dir()
+        create_output_repo_dir()
 
     def tearDown(self):
         cleanup_output_data()
@@ -68,11 +69,11 @@ class TestRepo(unittest.TestCase):
 
     def test_operations(self):
         log_info()
+        shutil.rmtree(TEST_OUTPUT_DATA_LOCAL_REPO_DIR)
+
         sample_workspace_list_dir = Path(TEST_SAMPLE_DATA_WORKSPACE_DIR).parent
         current_workspace_dir = Path(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         workspace_list = [1, 2, 3, 4, 5, 6, 7]
-
-        shutil.rmtree(str(current_workspace_dir))
 
         rp = Repo(current_workspace_dir, init=1)
 
@@ -85,18 +86,18 @@ class TestRepo(unittest.TestCase):
                 session_list=['review', 'publish'] if v in [5, 7] else ['review'],
                 data={},
                 current_session_id='review',
-                current_revision=v,
+                current_revision=v - 1,
                 add_only=1 if v == 5 else 0
             )
 
         # Test state_out()
         for v in workspace_list:
-            shutil.rmtree(str(current_workspace_dir))
+            cleanup_output_workspace_dir()
 
             current_wh = hashing.hash_workspace(current_workspace_dir)
-            rp.state_out(current_wh, 'review', v, overwrite=1)
+            rp.state_out(current_wh, 'review', v, overwrite=1, debug=0)
 
-            sample_workspace_dir = sample_workspace_list_dir.joinpath(v)
+            sample_workspace_dir = sample_workspace_list_dir.joinpath(str(v))
             sample_wh = hashing.hash_workspace(sample_workspace_dir)
             current_wh = hashing.hash_workspace(current_workspace_dir)
 
@@ -109,11 +110,11 @@ class TestRepo(unittest.TestCase):
 
             if v == 5:
                 sample_wh['medRes/textures/tex_1.tif'] = {
-                    WORKSPACE_HASH['HASH_KEY']: hashing.hash_file(str(tex1_hash)),
+                    WORKSPACE_HASH['HASH_KEY']: hashing.hash_file(tex1_hash),
                     WORKSPACE_HASH['RELATIVE_PATH_KEY']: 'medRes/textures/tex_1.tif'
                 }
                 sample_wh['medRes/textures/tex_2.tif'] = {
-                    WORKSPACE_HASH['HASH_KEY']: hashing.hash_file(str(tex2_hash)),
+                    WORKSPACE_HASH['HASH_KEY']: hashing.hash_file(tex2_hash),
                     WORKSPACE_HASH['RELATIVE_PATH_KEY']: 'medRes/textures/tex_2.tif'
                 }
             self.assertEqual(len(list(sample_wh)), len(list(current_wh)))
@@ -131,7 +132,7 @@ class TestRepo(unittest.TestCase):
         self.assertEqual(rp.all_revision('review'), workspace_list)
 
         # Test all_session()
-        self.assertEqual(rp.all_session(), set(['review', 'publish']))
+        self.assertEqual(set(rp.all_session), set(['review', 'publish']))
 
         # Test detail_file_version()
         valid_review_session = load_json(sample_workspace_list_dir.joinpath('_valid_review_session.json'))
@@ -156,6 +157,7 @@ class TestRepo(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    switch_log_vcs(1)
     testcase_classes = [
         TestRepo,
     ]

@@ -73,7 +73,7 @@ class Session(object):
         all_rev = self.all_revision
         return all_rev[-1] if all_rev else 0
 
-    def sync_from_state_chain(self, state_chain):
+    def sync_from_state_chain(self, state_chain, debug=0):
         """
         Args:
             state_chain (StateChain):
@@ -95,54 +95,67 @@ class Session(object):
         # Update `self._detail_version_data`
         for rev in self.all_revision:
             rev = str(rev)
-            if rev not in self._detail_version_data:
-                pre_rev = str(int(rev) - 1)
-                s2_id = self._revision_data[rev]
-                if rev == '1':
-                    s1_id = s2_id
+            if rev in self._detail_version_data:
+                continue
+
+            pre_rev = str(int(rev) - 1)
+            s2_id = self._revision_data[rev]
+            if rev == '1':
+                s1_id = s2_id
+            else:
+                s1_id = self._revision_data[pre_rev]
+            s1 = state_chain.state_data[s1_id]
+            s2 = state_chain.state_data[s2_id]
+            state_diff = state_chain.compare_state(s1, s2, return_path=1)
+            if debug:
+                log_info('DEBUG :: sync_from_state_chain()')
+                log_info('State diff from "{}" to "{}"'.format(s1_id, s2_id))
+                log_info(state_diff)
+                log_info()
+
+            # Detail file version of previous revision
+            if pre_rev in self._detail_version_data:
+                pre_detail_ver = self._detail_version_data[pre_rev]
+            else:
+                pre_detail_ver = {}
+
+            # Detail file version of current revision
+            cur_detail_ver = {}
+
+            for k in state_diff['unchanged']:
+                if k in pre_detail_ver:
+                    cur_detail_ver[k] = pre_detail_ver[k]
                 else:
-                    s1_id = self._revision_data[pre_rev]
-                s1 = state_chain.state_data[s1_id]
-                s2 = state_chain.state_data[s2_id]
-                state_diff = state_chain.compare_state(s1, s2, return_path=1)
+                    cur_detail_ver[k] = 1
 
-                # Detail file version of previous revision
-                if pre_rev in self._detail_version_data:
-                    pre_detail_ver = self._detail_version_data[pre_rev]
-                else:
-                    pre_detail_ver = {}
+            for k in state_diff['modified']:
+                if k in pre_detail_ver:
+                    cur_detail_ver[k] = pre_detail_ver[k] + 1
 
-                # Detail file version of current revision
-                cur_detail_ver = {}
+            # We treat as new files for following types of diff: added, renamed, moved, copied
+            new_files = list(state_diff['added'])
+            new_files.extend(list(state_diff['moved']))
+            new_files.extend(list(state_diff['renamed']))
+            new_files.extend(list(state_diff['copied']))
 
-                for k in state_diff['unchanged']:
-                    if k in pre_detail_ver:
-                        cur_detail_ver[k] = pre_detail_ver[k]
-                    else:
-                        cur_detail_ver[k] = 1
+            for k in new_files:
+                tmp_rev = pre_rev
+                found = 0
+                while not found:
+                    if tmp_rev == '0':
+                        break
+                    if tmp_rev in self._detail_version_data:
+                        if k in self._detail_version_data[tmp_rev]:
+                            # Continue from some version in history
+                            cur_detail_ver[k] = self._detail_version_data[tmp_rev][k] + 1
+                            found = 1
+                    tmp_rev = str(int(tmp_rev) - 1)
 
-                for k in state_diff['modified']:
-                    if k in pre_detail_ver:
-                        cur_detail_ver[k] = pre_detail_ver[k] + 1
+                # Added for the first time
+                if not found:
+                    cur_detail_ver[k] = 1
 
-                for k in state_diff['added']:
-                    tmp_rev = pre_rev
-                    found = 0
-                    while not found:
-                        if tmp_rev == '0':
-                            break
-                        if tmp_rev in self._detail_version_data:
-                            if k in self._detail_version_data[tmp_rev]:
-                                # Continue from some version in history
-                                cur_detail_ver[k] = self._detail_version_data[tmp_rev][k] + 1
-                                found = 1
-                        tmp_rev = str(int(tmp_rev) - 1)
-
-                    # Added for the first time
-                    if not found:
-                        cur_detail_ver[k] = 1
-
-                self._detail_version_data[rev] = cur_detail_ver
+            self._detail_version_data[rev] = cur_detail_ver
 
         self.save()
 

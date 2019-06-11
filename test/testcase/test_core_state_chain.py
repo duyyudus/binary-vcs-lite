@@ -94,6 +94,17 @@ class TestStateChain(unittest.TestCase):
         self.assertTrue(new_state.state_file.exists())
         os.remove(str(new_state.state_file))
 
+    def test_get_state(self):
+        log_info()
+        sc = StateChain(self.sample_state_dir)
+        s0 = sc.get_state('s0')
+        self.assertEqual(s0.state_id, 's0')
+
+        try:
+            sc.get_state('s9')
+        except Exception as e:
+            self.assertTrue(check_type(e, [state_chain.StateNotFound]))
+
 
 @log_test(__file__)
 def run():

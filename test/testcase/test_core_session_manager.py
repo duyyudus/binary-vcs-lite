@@ -129,6 +129,19 @@ class TestSessionManager(unittest.TestCase):
         except Exception as e:
             self.assertTrue(check_type(e, [session_manager.SessionNotFound]))
 
+    def test_get_session(self):
+        log_info()
+        sc = StateChain(self.sample_state_dir)
+        sm = SessionManager(self.sample_session_dir, sc)
+
+        sess = sm.get_session('review')
+        self.assertEqual(sess.session_id, 'review')
+
+        try:
+            sm.get_session('delivery')
+        except Exception as e:
+            self.assertTrue(check_type(e, [session_manager.SessionNotFound]))
+
 
 @log_test(__file__)
 def run():

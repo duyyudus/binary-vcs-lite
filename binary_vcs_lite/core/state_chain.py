@@ -6,6 +6,10 @@ from binary_vcs_lite.common.hashing import WorkspaceHash
 from .state import State
 
 
+class StateNotFound(VcsLiteError):
+    """State not found."""
+
+
 class InvalidState(VcsLiteError):
     """State file is neither valid nor exist."""
 
@@ -167,3 +171,17 @@ class StateChain(object):
         differ.compute_edit_sequence(show_matrix=0, show_edit=0)
         diff_data = differ.postprocess_edit_sequence(return_path=0, show_diff=0)
         return binary_vcs_diff.interpret(diff_data, return_path=return_path, show_diff=0)
+
+    def get_state(self, state_id):
+        """
+        Args:
+            state_id (str):
+        Returns:
+            State:
+        """
+        check_type(state_id, [str])
+
+        if state_id not in self._state_data:
+            raise StateNotFound()
+
+        return self._state_data[state_id]

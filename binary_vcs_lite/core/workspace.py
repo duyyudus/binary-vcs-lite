@@ -1,5 +1,10 @@
 from binary_vcs_lite.common.util import *
 from binary_vcs_lite.common import hashing
+from binary_vcs_lite.core.repo import Repo
+
+
+class WorkspaceNotFound(VcsLiteError):
+    """There is no repo folder."""
 
 
 class Workspace(object):
@@ -53,8 +58,23 @@ class Workspace(object):
             init (bool):
 
         """
-
         super(Workspace, self).__init__()
+        check_type(workspace_dir, [str, Path])
+        check_type(repo, [Repo])
+        check_type(session_id, [str])
+
+        workspace_dir = Path(workspace_dir)
+        self._workspace_dir = workspace_dir
+        self._deep_dir = self._workspace_dir.joinpath(VCS_FOLDER, WORKSPACE['FOLDER'])
+        self._metadata_path = self._deep_dir.joinpath(WORKSPACE['METADATA']['FILE'])
+
+        if init and not self._deep_dir.exists():
+            self._deep_dir.mkdir(parents=1, exist_ok=1)
+        elif not self._deep_dir.exists():
+            raise WorkspaceNotFound()
+
+        self.connect_repo(repo, session_id)
+        self.set_file_pattern(DEFAULT_FILE_PATTERN)
 
     @property
     def file_pattern(self):
@@ -72,6 +92,11 @@ class Workspace(object):
         return self._deep_dir
 
     @property
+    def metadata_path(self):
+        """Path: """
+        return self._metadata_path
+
+    @property
     def session_id(self):
         """str: ID of current session."""
         return self._session_id
@@ -84,19 +109,20 @@ class Workspace(object):
     @property
     def repo_id(self):
         """str: """
-        pass
+        return self._repo.repo_id
 
     @property
     def workspace_hash(self):
         """WorkspaceHash: """
-        pass
+        return hashing.hash_workspace(self._workspace_dir, file_pattern=self._file_pattern)
 
     def set_file_pattern(self, file_pattern):
         """
         Args:
             file_pattern (dict):
         """
-        pass
+        check_type(file_pattern, [dict])
+        self._file_pattern = file_pattern
 
     def connect_repo(self, repo, session_id):
         """
@@ -104,14 +130,22 @@ class Workspace(object):
             repo (Repo):
             session_id (str):
         """
-        pass
+        check_type(repo, [Repo])
+        check_type(session_id, [str])
+
+        self._repo = repo
+        self.load()
+        self._session_id = session_id
+        self._revision = self.detect_revision()
+        self.save()
 
     def absolute_path(self, hash_value):
         """
         Args:
             hash_value (str):
         """
-        pass
+        check_type(hash_value, [str])
+        return self.workspace_hash.hash_to_path(hash_value)
 
     def commit(self, session_list, data, add_only, fast_forward):
         """
@@ -121,7 +155,27 @@ class Workspace(object):
             add_only (bool):
             fast_forward (bool):
         """
-        pass
+        check_type(session_list, [list])
+        check_type(data, [dict])
+
+        current_session_id = self.session_id
+        current_revision = self.revision
+        if fast_forward and current_session_id in session_list:
+            current_revision = self._repo.latest_revision(current_session_id)
+            self._revision = current_revision
+
+        state_in_succeed = self._repo.state_in(
+            self.workspace_hash,
+            session_list,
+            data,
+            current_session_id,
+            current_revision,
+            add_only
+        )
+        if state_in_succeed:
+            if current_session_id in session_list:
+                self._revision += 1
+                self.save()
 
     def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
         """
@@ -131,20 +185,76 @@ class Workspace(object):
             checkout_dir (Path, None by default):
             overwrite (bool, False by default):
         """
-        pass
+        check_type(session_id, [str])
+        check_type(revision, [int])
+        check_type(checkout_dir, [str, Path, type(None)])
+
+        ws_hash = self.workspace_hash
+        if checkout_dir:
+            ws_hash.set_workspace_dir(checkout_dir)
+        state_out_succeed = self._repo.state_out(ws_hash, session_id, revision, overwrite)
+        if state_out_succeed:
+            self._session_id = session_id
+            self._revision = revision
+            self.save()
 
     def save(self):
-        pass
+        """Save workspace info to METADATA file."""
+
+        repo_record_key = WORKSPACE['METADATA']['REPO_RECORD_KEY']
+        path_key = WORKSPACE['METADATA']['PATH_KEY']
+        session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
+        revision_key = WORKSPACE['METADATA']['REVISION_KEY']
+
+        data = load_json(self._metadata_path)
+        if repo_record_key in data:
+            repo_record = data[repo_record_key]
+        else:
+            repo_record = {}
+        repo_record[self.repo_id] = {
+            path_key: self._repo.repo_dir.as_posix(),
+            session_id_key: self._session_id,
+            revision_key: self._revision
+        }
+        data[repo_record_key] = repo_record
+        save_json(data, self._metadata_path)
 
     def load(self):
-        pass
+        """Load workspace info from METADATA file."""
+
+        repo_record_key = WORKSPACE['METADATA']['REPO_RECORD_KEY']
+        path_key = WORKSPACE['METADATA']['PATH_KEY']
+        session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
+        revision_key = WORKSPACE['METADATA']['REVISION_KEY']
+
+        data = load_json(self._metadata_path)
+        if repo_record_key not in data:
+            return
+        repo_record = data[repo_record_key]
+        if self.repo_id in repo_record:
+            self._session_id = repo_record[self.repo_id][session_id_key]
+            self._revision = repo_record[self.repo_id][revision_key]
 
     def detect_revision(self):
         """
         Returns:
             int:
         """
-        pass
+        repo_record_key = WORKSPACE['METADATA']['REPO_RECORD_KEY']
+        path_key = WORKSPACE['METADATA']['PATH_KEY']
+        session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
+        revision_key = WORKSPACE['METADATA']['REVISION_KEY']
+
+        data = load_json(self._metadata_path)
+
+        if repo_record_key in data:
+            repo_record = data[repo_record_key]
+            if self.repo_id in repo_record:
+                if revision_key in repo_record[self.repo_id]:
+                    if repo_record[self.repo_id][session_id_key] == self._session_id:
+                        return repo_record[self.repo_id][revision_key]
+
+        return self.latest_revision(self._session_id)
 
     def latest_revision(self, session_id):
         """Wrap same method in `self._repo`
@@ -155,7 +265,7 @@ class Workspace(object):
         Returns:
             int:
         """
-        pass
+        return self._repo.latest_revision(session_id)
 
     def all_revision(self, session_id):
         """Wrap same method in `self._repo`
@@ -166,17 +276,17 @@ class Workspace(object):
         Returns:
             list of int:
         """
-        pass
+        return self._repo.all_revision(session_id)
 
     def all_session(self):
-        """Wrap same method in `self._repo`
+        """Wrap same property in `self._repo`
 
         Returns:
             list of str:
         """
-        pass
+        return self._repo.all_session
 
-    def detail_file_version(self, session_id, revision, relative_path):
+    def detail_file_version(self, session_id, revision=None, relative_path=None):
         """Wrap same method in `self._repo`
 
         Args:
@@ -187,4 +297,4 @@ class Workspace(object):
         Returns:
             dict:
         """
-        pass
+        return self._repo.detail_file_version(session_id, revision, relative_path)

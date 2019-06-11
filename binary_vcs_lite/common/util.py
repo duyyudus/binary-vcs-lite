@@ -203,7 +203,7 @@ def save_json(data, json_path, verbose=0):
     if not json_path.parent.exists():
         json_path.parent.mkdir(parents=1)
     with open(str(json_path), 'w') as f:
-        f.write(json.dumps(data))
+        f.write(json.dumps(data, indent=2))
         if verbose:
             log_info('Saved JSON: {}'.format(json_path))
 
