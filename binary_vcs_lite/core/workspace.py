@@ -70,6 +70,7 @@ class Workspace(object):
 
         if init and not self._deep_dir.exists():
             self._deep_dir.mkdir(parents=1, exist_ok=1)
+            make_hidden(self._deep_dir.parent)
         elif not self._deep_dir.exists():
             raise WorkspaceNotFound()
 
@@ -147,7 +148,7 @@ class Workspace(object):
         check_type(hash_value, [str])
         return self.workspace_hash.hash_to_path(hash_value)
 
-    def commit(self, session_list, data, add_only, fast_forward):
+    def commit(self, session_list, data, add_only, fast_forward, debug=0):
         """
         Args:
             session_list (list of str):
@@ -160,6 +161,12 @@ class Workspace(object):
 
         current_session_id = self.session_id
         current_revision = self.revision
+
+        if debug:
+            log_info('Commit ::')
+            log_info('----current_session_id: {}'.format(current_session_id))
+            log_info('----current_revision: {}'.format(current_revision))
+
         if fast_forward and current_session_id in session_list:
             current_revision = self._repo.latest_revision(current_session_id)
             self._revision = current_revision
@@ -176,6 +183,7 @@ class Workspace(object):
             if current_session_id in session_list:
                 self._revision += 1
                 self.save()
+        log_info('Commit succeed')
 
     def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
         """
@@ -197,6 +205,7 @@ class Workspace(object):
             self._session_id = session_id
             self._revision = revision
             self.save()
+        log_info('Checkout succeed')
 
     def save(self):
         """Save workspace info to METADATA file."""
@@ -223,7 +232,6 @@ class Workspace(object):
         """Load workspace info from METADATA file."""
 
         repo_record_key = WORKSPACE['METADATA']['REPO_RECORD_KEY']
-        path_key = WORKSPACE['METADATA']['PATH_KEY']
         session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
         revision_key = WORKSPACE['METADATA']['REVISION_KEY']
 
@@ -235,24 +243,33 @@ class Workspace(object):
             self._session_id = repo_record[self.repo_id][session_id_key]
             self._revision = repo_record[self.repo_id][revision_key]
 
-    def detect_revision(self):
-        """
+    def detect_revision(self, debug=0):
+        """Detect revision for current session.
+
+        If recorded in METADATA and valid, use that value, otherwise use latest revision from repo
+
         Returns:
             int:
         """
         repo_record_key = WORKSPACE['METADATA']['REPO_RECORD_KEY']
-        path_key = WORKSPACE['METADATA']['PATH_KEY']
         session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
         revision_key = WORKSPACE['METADATA']['REVISION_KEY']
 
         data = load_json(self._metadata_path)
 
+        if debug:
+            log_info('Detect Revision ::')
+            log_info(data)
+
         if repo_record_key in data:
             repo_record = data[repo_record_key]
             if self.repo_id in repo_record:
-                if revision_key in repo_record[self.repo_id]:
-                    if repo_record[self.repo_id][session_id_key] == self._session_id:
-                        return repo_record[self.repo_id][revision_key]
+                repo_history = repo_record[self.repo_id]
+                if revision_key in repo_history:
+                    if repo_history[session_id_key] == self._session_id:
+                        revision = repo_history[revision_key]
+                        if revision <= self.latest_revision(self._session_id):
+                            return revision
 
         return self.latest_revision(self._session_id)
 
@@ -298,3 +315,15 @@ class Workspace(object):
             dict:
         """
         return self._repo.detail_file_version(session_id, revision, relative_path)
+
+    def ls_changes(self):
+        """Detect changes between current workspace and latest revision of current session
+
+        Returns:
+            dict:
+        """
+        return self._repo.ls_changes(
+            self.workspace_hash,
+            self._session_id,
+            self.latest_revision(self._session_id)
+        )

@@ -234,3 +234,18 @@ def check_type(obj, types, raise_exception=1):
         raise InvalidType(msg)
     else:
         return 0
+
+
+def make_hidden(input_path):
+    """Make file/folder hidden ( window only so far )
+    Args:
+        input_path (str|Path):
+    """
+    check_type(input_path, [str, Path])
+
+    input_path = str(input_path)
+    try:
+        os.system('attrib +h {}'.format(input_path))
+    except Exception as e:
+        log_error('Cannot make hidden: {}'.format(input_path))
+        log_error(str(e))

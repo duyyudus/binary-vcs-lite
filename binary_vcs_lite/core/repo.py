@@ -92,11 +92,13 @@ class Repo(object):
             self._blob_dir.mkdir(parents=1, exist_ok=1)
             self._state_dir.mkdir(parents=1, exist_ok=1)
             self._session_dir.mkdir(parents=1, exist_ok=1)
-            self._repo_id = '{}_{}_{}'.format(
+            self._repo_id = '{}_{}_{}_{}'.format(
                 os.environ['username'],
                 time.strftime('%Y%m%d'),
-                time.strftime('%H%M')
+                time.strftime('%H%M'),
+                hashing.hash_str(repo_dir.as_posix())[:4]
             )
+            make_hidden(self._deep_dir.parent)
             self.save()
         elif not self._deep_dir.exists():
             raise RepoNotFound()
@@ -160,6 +162,11 @@ class Repo(object):
         check_type(current_session_id, [str])
         check_type(current_revision, [int])
 
+        if debug:
+            log_info('State In ::')
+            log_info('----current_session_id: {}'.format(current_session_id))
+            log_info('----current_revision: {}'.format(current_revision))
+
         if current_session_id in self.all_session:
             if current_revision < self._session_manager.session_data[current_session_id].latest_revision:
                 raise OutOfDate()
@@ -208,7 +215,7 @@ class Repo(object):
 
         self._blob.store(target_wh)
         if debug:
-            log_info('Stored blob with workspace hash')
+            log_info('State In :: stored blob with workspace hash')
             log_info(target_wh)
 
         new_state.save()
@@ -241,7 +248,7 @@ class Repo(object):
         state_wh.set_workspace_dir(target_wh.workspace_dir)
         self._blob.extract(state_wh)
         if debug:
-            log_info('Extracted blob with workspace hash')
+            log_info('State Out: extracted blob with workspace hash')
             log_info(state_wh)
         return 1
 
@@ -264,7 +271,7 @@ class Repo(object):
             sess = self._session_manager.get_session(session_id)
             state_id = sess.revision_data[revision]
             s = self._state_chain.get_state(state_id)
-        except Exception as e:
+        except Exception:
             raise CannotFindState()
             s = None
         return s
@@ -319,3 +326,25 @@ class Repo(object):
             revision,
             relative_path
         )
+
+    def ls_changes(self, target_wh, current_session_id, current_revision):
+        """Check diff between target workspace hash and `current_revision` of `current_session_id`
+
+        Args:
+            target_wh (WorkspaceHash):
+            current_session_id (str):
+            current_revision (int):
+        Returns:
+            dict:
+        """
+        check_type(target_wh, [WorkspaceHash])
+        check_type(current_session_id, [str])
+        check_type(current_revision, [int])
+
+        if current_session_id in self._session_manager.session_data:
+            sess = self._session_manager.get_session(current_session_id)
+            if current_revision in sess.all_revision:
+                current_state = self.find_state(current_session_id, current_revision)
+        target_state = self._state_chain.new_state(target_wh, [], data={}, save=0)
+        state_diff = self._state_chain.compare_state(current_state, target_state, return_path=1)
+        return state_diff

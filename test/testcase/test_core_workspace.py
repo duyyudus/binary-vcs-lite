@@ -92,7 +92,7 @@ class TestWorkspace(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(1)
+    switch_log_vcs(0)
     testcase_classes = [
         TestWorkspace,
     ]

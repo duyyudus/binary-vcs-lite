@@ -34,6 +34,12 @@ class VersioningInterface(object):
             init_repo (bool):
         """
         super(VersioningInterface, self).__init__()
+        check_type(workspace_dir, [str, Path])
+        check_type(repo_dir, [str, Path])
+        check_type(session_id, [str])
+
+        self._repo = Repo(repo_dir, init_repo)
+        self._workspace = Workspace(workspace_dir, self._repo, session_id, init_workspace)
 
     @property
     def repo(self):
@@ -49,7 +55,7 @@ class VersioningInterface(object):
         Args:
             file_pattern (dict):
         """
-        pass
+        self._workspace.set_file_pattern(file_pattern)
 
     def commit(self, session_list, data, add_only, fast_forward):
         """Wrap same method in `self._workspace`
@@ -60,7 +66,7 @@ class VersioningInterface(object):
             add_only (bool):
             fast_forward (bool):
         """
-        pass
+        self._workspace.commit(session_list, data, add_only, fast_forward)
 
     def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
         """Wrap same method in `self._workspace`
@@ -71,7 +77,7 @@ class VersioningInterface(object):
             checkout_dir (Path, None by default):
             overwrite (bool, False by default):
         """
-        pass
+        self._workspace.checkout(session_id, revision, checkout_dir, overwrite)
 
     def latest_revision(self, session_id):
         """Wrap same method in `self._workspace`
@@ -82,7 +88,7 @@ class VersioningInterface(object):
         Returns:
             int:
         """
-        pass
+        return self._workspace.latest_revision(session_id)
 
     def all_revision(self, session_id):
         """Wrap same method in `self._workspace`
@@ -93,7 +99,7 @@ class VersioningInterface(object):
         Returns:
             list of int:
         """
-        pass
+        return self._workspace.all_revision(session_id)
 
     def all_session(self):
         """Wrap same method in `self._workspace`
@@ -101,9 +107,9 @@ class VersioningInterface(object):
         Returns:
             list of str:
         """
-        pass
+        return self._workspace.all_session()
 
-    def detail_file_version(self, session_id, revision, relative_path):
+    def detail_file_version(self, session_id, revision=None, relative_path=None):
         """Wrap same method in `self._workspace`
 
         Args:
@@ -114,7 +120,15 @@ class VersioningInterface(object):
         Returns:
             dict:
         """
-        pass
+        return self._workspace.detail_file_version(session_id, revision, relative_path)
+
+    def ls_changes(self):
+        """Wrap same method in `self._workspace`
+
+        Returns:
+            dict:
+        """
+        return self._workspace.ls_changes()
 
 
 class LocalVersioning(VersioningInterface):

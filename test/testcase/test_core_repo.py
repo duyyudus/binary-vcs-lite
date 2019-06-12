@@ -139,6 +139,8 @@ class TestRepo(unittest.TestCase):
         valid_publish_session = load_json(sample_workspace_list_dir.joinpath('_valid_publish_session.json'))
 
         # Session "review" with latest version 7
+        log_info(rp.detail_file_version('review'))
+        log_info(valid_review_session[SESSION['CONTENT']['DETAIL_VERSION_KEY']]['7'])
         self.assertEqual(
             rp.detail_file_version('review'),
             valid_review_session[SESSION['CONTENT']['DETAIL_VERSION_KEY']]['7']
@@ -157,7 +159,7 @@ class TestRepo(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(1)
+    switch_log_vcs(0)
     testcase_classes = [
         TestRepo,
     ]

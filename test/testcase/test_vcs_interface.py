@@ -1,5 +1,7 @@
 from _setup_test import *
 VersioningInterface = vcs_interface.VersioningInterface
+RemoteVersioning = vcs_interface.RemoteVersioning
+LocalVersioning = vcs_interface.LocalVersioning
 
 
 class TestVersioningInterface(unittest.TestCase):
@@ -22,7 +24,7 @@ class TestVersioningInterface(unittest.TestCase):
             'medRes/old/asset.ma',
             'medRes/textures/tex_1.tif',
             'medRes/textures/tex_2_new_name.tif',
-            'medRes/textures/tex_2_new_name.tif',
+            'medRes/textures/tex_3_new_name.tif',
             'medRes/textures/tex_4.tif',
             'proxyRes/asset.ma',
             'proxyRes/asset.rig.ma',
@@ -39,6 +41,7 @@ class TestVersioningInterface(unittest.TestCase):
         vi = VersioningInterface(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
             repo_dir=TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
+            session_id='review',
             init_workspace=1,
             init_repo=1
         )
@@ -52,6 +55,7 @@ class TestVersioningInterface(unittest.TestCase):
         vi = VersioningInterface(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
             repo_dir=TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
+            session_id='review',
             init_workspace=1,
             init_repo=1
         )
@@ -60,6 +64,7 @@ class TestVersioningInterface(unittest.TestCase):
 
     def test_operations(self):
         log_info()
+
         # Test commit() on "review" session
         vi = VersioningInterface(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
@@ -86,7 +91,7 @@ class TestVersioningInterface(unittest.TestCase):
         self.assertEqual(vi.latest_revision('publish'), 1)
         self.assertEqual(vi.all_revision('review'), [1, 2])
         self.assertEqual(vi.all_revision('publish'), [1])
-        self.assertEqual(set(list(vi.all_session)), set(list(['review', 'publish'])))
+        self.assertEqual(set(vi.all_session()), set(['review', 'publish']))
 
         file_versions = vi.detail_file_version('publish', 1)
         self.assertGreater(len(file_versions), 0)
@@ -94,7 +99,7 @@ class TestVersioningInterface(unittest.TestCase):
             self.assertEqual(file_versions[k], 1)
 
         # Test checkout()
-        shutil.rmtree(TEST_OUTPUT_DATA_WORKSPACE_DIR)
+        cleanup_output_workspace_dir
         vi.checkout('review', 2)
         for f in self.workspace_files:
             self.assertIn(f, vi.workspace.workspace_hash)
@@ -104,47 +109,6 @@ class TestLocalVersioning(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestLocalVersioning, self).__init__(*args, **kwargs)
-        self.output_vcs_dir = Path(
-            TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
-            VCS_FOLDER
-        )
-        self.output_workspace_deep_dir = self.output_vcs_dir.joinpath(
-            WORKSPACE['FOLDER']
-        )
-        self.workspace_files = [
-            'medRes/asset.ma',
-            'medRes/asset.rig.ma',
-            'medRes/old/asset.ma',
-            'medRes/textures/tex_1.tif',
-            'medRes/textures/tex_2_new_name.tif',
-            'medRes/textures/tex_2_new_name.tif',
-            'medRes/textures/tex_4.tif',
-            'proxyRes/asset.ma',
-            'proxyRes/asset.rig.ma',
-        ]
-
-    def setUp(self):
-        create_output_workspace_dir()
-
-    def tearDown(self):
-        cleanup_output_data()
-
-    def test_init(self):
-        log_info()
-        vi = LocalVersioning(
-            workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
-            session_id='review'
-        )
-        self.assertEqual(vi.workspace.deep_dir, self.output_workspace_deep_dir)
-        self.assertEqual(vi.repo.deep_dir, self.output_workspace_deep_dir)
-        self.assertTrue(vi.workspace.deep_dir.exists())
-        self.assertTrue(vi.repo.deep_dir.exists())
-
-
-class TestRemoteVersioning(unittest.TestCase):
-
-    def __init__(self, *args, **kwargs):
-        super(TestRemoteVersioning, self).__init__(*args, **kwargs)
         self.output_vcs_dir = Path(
             TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
             VCS_FOLDER
@@ -164,13 +128,51 @@ class TestRemoteVersioning(unittest.TestCase):
 
     def test_init(self):
         log_info()
-        vi = RemoteVersioning(
+        vi = LocalVersioning(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
-            repo_dir=TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
             session_id='review'
         )
         self.assertEqual(vi.workspace.deep_dir, self.output_workspace_deep_dir)
         self.assertEqual(vi.repo.deep_dir, self.output_repo_deep_dir)
+        self.assertTrue(vi.workspace.deep_dir.exists())
+        self.assertTrue(vi.repo.deep_dir.exists())
+
+
+class TestRemoteVersioning(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TestRemoteVersioning, self).__init__(*args, **kwargs)
+        self.output_vcs_dir = Path(
+            TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
+            VCS_FOLDER
+        )
+        self.output_remove_vcs_dir = Path(
+            TEST_OUTPUT_DATA_REMOTE_REPO_DIR,
+            VCS_FOLDER
+        )
+
+        self.output_workspace_deep_dir = self.output_vcs_dir.joinpath(
+            WORKSPACE['FOLDER']
+        )
+        self.output_remote_repo_deep_dir = self.output_remove_vcs_dir.joinpath(
+            REPO['FOLDER']
+        )
+
+    def setUp(self):
+        create_output_workspace_dir()
+
+    def tearDown(self):
+        cleanup_output_data()
+
+    def test_init(self):
+        log_info()
+        vi = RemoteVersioning(
+            workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
+            repo_dir=TEST_OUTPUT_DATA_REMOTE_REPO_DIR,
+            session_id='review'
+        )
+        self.assertEqual(vi.workspace.deep_dir, self.output_workspace_deep_dir)
+        self.assertEqual(vi.repo.deep_dir, self.output_remote_repo_deep_dir)
         self.assertTrue(vi.workspace.deep_dir.exists())
         self.assertTrue(vi.repo.deep_dir.exists())
 
