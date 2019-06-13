@@ -13,19 +13,17 @@ class TestBlob(unittest.TestCase):
         cleanup_output_data()
 
     def test_store_blob(self):
-        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
         )
-        results = b.store(workspace_hash, verbose=1)
+        results = b.store(workspace_hash)
 
         self.assertGreater(len(results), 0)
         for p in results:
             self.assertTrue(Path(p).exists())
 
     def test_extract_blob(self):
-        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         b = blob.Blob(
             blob_dir=Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
@@ -33,7 +31,7 @@ class TestBlob(unittest.TestCase):
         b.store(workspace_hash)
         cleanup_output_workspace_dir()
 
-        results = b.extract(workspace_hash, verbose=1)
+        results = b.extract(workspace_hash)
 
         self.assertGreater(len(results), 0)
         for p in results:
@@ -42,7 +40,7 @@ class TestBlob(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(0)
+    set_global_log_level(4)
     testcase_classes = [
         TestBlob,
     ]

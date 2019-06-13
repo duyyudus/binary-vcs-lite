@@ -6,6 +6,11 @@ from .blob import Blob
 from .state_chain import StateChain
 from .session_manager import SessionManager
 
+_vcs_logger = VcsLogger()
+log_info = _vcs_logger.log_info
+log_debug = _vcs_logger.log_debug
+log_error = _vcs_logger.log_error
+
 
 class RepoNotFound(VcsLiteError):
     """There is no repo folder."""
@@ -81,14 +86,14 @@ class Repo(object):
         check_type(repo_dir, [str, Path])
 
         repo_dir = Path(repo_dir)
-        self._repo_dir = repo_dir
+        self._repo_dir = repo_dir.resolve()
         self._deep_dir = self._repo_dir.joinpath(VCS_FOLDER, REPO['FOLDER'])
         self._blob_dir = self._deep_dir.joinpath(BLOB['FOLDER'])
         self._state_dir = self._deep_dir.joinpath(STATE['FOLDER'])
         self._session_dir = self._deep_dir.joinpath(SESSION['FOLDER'])
         self._metadata_path = self._deep_dir.joinpath(REPO['METADATA']['FILE'])
 
-        if init and not self._deep_dir.exists():
+        if init and not (self._blob_dir.exists() and self._state_dir.exists() and self._session_dir.exists()):
             self._blob_dir.mkdir(parents=1, exist_ok=1)
             self._state_dir.mkdir(parents=1, exist_ok=1)
             self._session_dir.mkdir(parents=1, exist_ok=1)
@@ -98,17 +103,27 @@ class Repo(object):
                 time.strftime('%H%M'),
                 hashing.hash_str(repo_dir.as_posix())[:4]
             )
-            make_hidden(self._deep_dir.parent)
             self.save()
         elif not self._deep_dir.exists():
             raise RepoNotFound()
         elif not (self._blob_dir.exists() and self._state_dir.exists() and self._session_dir.exists()):
             raise InvalidRepo()
 
+        self._enable_log()
+
+        make_hidden(self._deep_dir.parent, _vcs_logger)
+
         self.load()
         self._blob = Blob(self._blob_dir)
         self._state_chain = StateChain(self._state_dir)
         self._session_manager = SessionManager(self._session_dir, self._state_chain)
+
+    def _enable_log(self):
+        log_file = Path(self._deep_dir, LOG_FOLDER, '_{}_{}.txt'.format(
+            os.environ['username'],
+            time.strftime('%Y-%m-%d')
+        ))
+        _vcs_logger.setup(log_file, Path(__file__).stem)
 
     @property
     def repo_dir(self):
@@ -141,8 +156,7 @@ class Repo(object):
                  data,
                  current_session_id,
                  current_revision,
-                 add_only,
-                 debug=0):
+                 add_only):
         """
         Args:
             target_wh (WorkspaceHash):
@@ -162,10 +176,9 @@ class Repo(object):
         check_type(current_session_id, [str])
         check_type(current_revision, [int])
 
-        if debug:
-            log_info('State In ::')
-            log_info('----current_session_id: {}'.format(current_session_id))
-            log_info('----current_revision: {}'.format(current_revision))
+        log_info('State In ::')
+        log_info('----current_session_id: {}'.format(current_session_id))
+        log_info('----current_revision: {}'.format(current_revision))
 
         if current_session_id in self.all_session:
             if current_revision < self._session_manager.session_data[current_session_id].latest_revision:
@@ -214,9 +227,9 @@ class Repo(object):
                         target_wh.pop(n)
 
         self._blob.store(target_wh)
-        if debug:
-            log_info('State In :: stored blob with workspace hash')
-            log_info(target_wh)
+
+        log_info('State In :: stored blob with workspace hash')
+        log_info(target_wh)
 
         new_state.save()
 
@@ -224,7 +237,7 @@ class Repo(object):
             self._session_manager.update_session(session_id)
         return 1
 
-    def state_out(self, target_wh, session_id, revision, overwrite, debug=0):
+    def state_out(self, target_wh, session_id, revision, overwrite):
         """
         Args:
             target_wh (WorkspaceHash):
@@ -247,9 +260,10 @@ class Repo(object):
 
         state_wh.set_workspace_dir(target_wh.workspace_dir)
         self._blob.extract(state_wh)
-        if debug:
-            log_info('State Out: extracted blob with workspace hash')
-            log_info(state_wh)
+
+        log_info('State Out: extracted blob with workspace hash')
+        log_info(state_wh)
+
         return 1
 
     def find_state(self, session_id, revision):
@@ -282,13 +296,13 @@ class Repo(object):
         repo_id_key = REPO['METADATA']['REPO_ID_KEY']
         data = {}
         data[repo_id_key] = self.repo_id
-        save_json(data, self.metadata_path)
+        save_json(data, self.metadata_path, _vcs_logger)
 
     def load(self):
         """Load repo info to METADATA file."""
 
         repo_id_key = REPO['METADATA']['REPO_ID_KEY']
-        data = load_json(self.metadata_path)
+        data = load_json(self.metadata_path, _vcs_logger)
         self._repo_id = data[repo_id_key]
 
     def latest_revision(self, session_id):

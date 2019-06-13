@@ -24,7 +24,6 @@ class TestWorkspaceHash(unittest.TestCase):
         cleanup_output_data()
 
     def init_workspace_hash(self):
-        log_info()
         workspace_hash = hashing.hash_workspace(
             TEST_OUTPUT_DATA_WORKSPACE_DIR,
             file_pattern={
@@ -42,13 +41,12 @@ class TestWorkspaceHash(unittest.TestCase):
                     # '.tx$'
                 ]
             },
-            verbose=1
+            vcs_logger=VcsLogger()
         )
 
         return workspace_hash
 
     def test_init(self):
-        log_info()
         workspace_hash = self.init_workspace_hash()
 
         self.assertGreater(len(workspace_hash), 0)
@@ -60,7 +58,6 @@ class TestWorkspaceHash(unittest.TestCase):
             self.assertIn(f, workspace_hash)
 
     def test_hash_to_path(self):
-        log_info()
         workspace_hash = self.init_workspace_hash()
 
         self.assertGreater(len(workspace_hash), 0)
@@ -69,7 +66,6 @@ class TestWorkspaceHash(unittest.TestCase):
             self.assertEqual(relative_path, v[WORKSPACE_HASH['RELATIVE_PATH_KEY']])
 
     def test_set_workspace_dir(self):
-        log_info()
         workspace_hash = self.init_workspace_hash()
         workspace_dir = 'new/workspace/dir'
         workspace_hash.set_workspace_dir(workspace_dir)
@@ -97,7 +93,7 @@ class TestWorkspaceHash(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(0)
+    set_global_log_level(4)
     testcase_classes = [
         TestWorkspaceHash,
     ]

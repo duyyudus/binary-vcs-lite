@@ -6,6 +6,7 @@ import json
 import re
 import shutil
 import copy
+import logging
 from pprint import pformat
 
 if sys.version_info[0] == 3:
@@ -15,7 +16,9 @@ else:
 
 from .config import *
 
-_log_on = 1
+# int: 0, 1, 2, 3, 4, 5
+#   Set to 0 to turn off
+_global_log_level = 0
 
 
 class VcsLiteError(Exception):
@@ -24,7 +27,7 @@ class VcsLiteError(Exception):
     def __init__(self, message=''):
         super(VcsLiteError, self).__init__()
         self._message = message
-        log_error('{}'.format(message))
+        print('{}'.format(message))
 
     def __str__(self):
         return self._message
@@ -34,6 +37,127 @@ class InvalidType(VcsLiteError):
     """Invalid type."""
 
 
+class VcsLogger(object):
+    """Custom logger for file versioning operations"""
+
+    def __init__(self):
+        super(VcsLogger, self).__init__()
+        self.lvl_map = {
+            1: logging.DEBUG,
+            2: logging.INFO,
+            3: logging.WARNING,
+            4: logging.ERROR,
+            5: logging.CRITICAL,
+        }
+        self.lvl = self.lvl_map[_global_log_level] if _global_log_level else logging.INFO
+        self.log_name = LOG_PREFIX
+
+        # Default root logger
+        self.logger = logging.getLogger()
+        if self.logger.handlers:
+            self.logger.handlers = []
+        self.logger.setLevel(self.lvl)
+        ch = logging.StreamHandler()
+        ch.setLevel(self.lvl)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+
+    def setup(self, log_file, log_name, log_level=2):
+        self.log_file = log_file
+        self.log_name = log_name
+        self.lvl = self.lvl_map[_global_log_level] if _global_log_level else self.lvl_map[log_level]
+
+        self.logger = logging.getLogger(log_name)
+        if self.logger.handlers:
+            self.logger.handlers = []
+
+        self.logger.setLevel(self.lvl)
+
+        # Create file handler and set level
+        if not Path(log_file).parent.exists():
+            Path(log_file).parent.mkdir(parents=1)
+        fh = logging.FileHandler(filename=str(log_file), mode='a')
+        fh.setLevel(self.lvl)
+
+        # Create console handler and set level
+        ch = logging.StreamHandler()
+        ch.setLevel(self.lvl)
+
+        # Create formatter
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+        # Add formatter
+        fh.setFormatter(formatter)
+        ch.setFormatter(formatter)
+
+        # Add handlers to self.logger
+        self.logger.addHandler(ch)
+        self.logger.addHandler(fh)
+
+    def _log_message(self, args):
+        def fstr(s):
+            if type(s) is str:
+                return s
+            else:
+                return '\n' + pformat(s)
+
+        _log_indent = 0
+        message = ''.join([fstr(a) for a in args])
+        return (''.join([' ' for i in range(_log_indent * 4)]), message)
+
+    def set_log_level(self, log_level):
+        """
+        Args:
+            lvl (int): log level
+                0: logging.DEBUG
+                1: logging.INFO
+                2: logging.WARNING
+                3: logging.ERROR
+                4: logging.CRITICAL
+        """
+        self.lvl = self.lvl_map[log_level]
+        self.logger.setLevel(self.lvl)
+
+        for h in self.logger.handlers:
+            h.setLevel(self.lvl)
+            for f in h.formatters:
+                f.setLevel(self.lvl)
+
+    def log_debug(self, *args):
+        indent_str, message = self._log_message(args)
+        if not message:
+            print('')
+            return 0
+
+        self.logger.debug('{} :: {}'.format(
+            self.log_name,
+            indent_str + message
+        ))
+
+    def log_info(self, *args):
+        indent_str, message = self._log_message(args)
+        if not message:
+            print('')
+            return 0
+
+        self.logger.info('{} :: {}'.format(
+            self.log_name,
+            indent_str + message
+        ))
+
+    def log_error(self, *args):
+        indent_str, message = self._log_message(args)
+        if not message:
+            print('')
+            return 0
+
+        self.logger.error('{} :: {}'.format(
+            self.log_name,
+            indent_str + message
+        ))
+
+
 def _time_measure(func):
     """Measure running time of a function."""
 
@@ -41,53 +165,14 @@ def _time_measure(func):
     def wrapper(*args, **kwargs):
         st = time.time()
         ret = func(*args, **kwargs)
-        log_info('Running time of {}() : {} seconds'.format(func.__name__, str(time.time() - st)))
+        print('Running time of {}() : {} seconds'.format(func.__name__, str(time.time() - st)))
         return ret
     return wrapper
 
 
-def _log_message(args):
-    def fstr(s):
-        if type(s) is str:
-            return s
-        else:
-            return '\n' + pformat(s)
-
-    _log_indent = 0
-    message = ''.join([fstr(a) for a in args])
-    return (''.join([' ' for i in range(_log_indent * 4)]), message)
-
-
-def log_info(*args):
-    if not _log_on:
-        return 0
-    indent_str, message = _log_message(args)
-    if not message:
-        print('')
-        return 0
-    print('{} :: {}'.format(
-        LOG_PREFIX,
-        indent_str + message
-    ))
-
-
-def log_error(*args):
-    if not _log_on:
-        return 0
-    indent_str, message = _log_message(args)
-    if not message:
-        print('')
-        return 0
-    print('{} {} :: {}'.format(
-        LOG_PREFIX,
-        LOG_ERROR_PREFIX,
-        indent_str + message
-    ))
-
-
-def switch_log_vcs(is_on):
-    global _log_on
-    _log_on = is_on
+def set_global_log_level(log_level):
+    global _global_log_level
+    _global_log_level = log_level
 
 
 def match_regex_pattern(input_str, patterns):
@@ -98,12 +183,15 @@ def match_regex_pattern(input_str, patterns):
     Returns:
         bool:
     """
+    check_type(input_str, [str])
+    check_type(patterns, [list])
+
     for p in patterns:
         if re.findall(p, input_str):
             return 1
 
 
-def copy_file(source, target, overwrite=0, verbose=0):
+def copy_file(source, target, vcs_logger, overwrite=0):
     """Copy file and return result code.
 
     `source` and `target` will be converted to `str`.
@@ -122,18 +210,16 @@ def copy_file(source, target, overwrite=0, verbose=0):
         try:
             Path(target).parent.mkdir(parents=1)
         except Exception as e:
-            if verbose:
-                log_info('Copy mkdir error: {}'.format(target))
-                log_info('----{}'.format(str(e)))
+            vcs_logger.log_error('Copy mkdir error: {}'.format(target))
+            vcs_logger.log_error('----{}'.format(str(e)))
             return 0
 
     if overwrite and Path(target).exists():
         try:
             os.remove(target)
         except Exception as e:
-            if verbose:
-                log_info('Copy overwrite error: {}'.format(target))
-                log_info('----{}'.format(str(e)))
+            vcs_logger.log_error('Copy overwrite error: {}'.format(target))
+            vcs_logger.log_error('----{}'.format(str(e)))
             return 0
 
     if Path(target).exists():
@@ -145,18 +231,16 @@ def copy_file(source, target, overwrite=0, verbose=0):
             if Path(target).exists():
                 try:
                     os.remove(target)
-                except Exception as e:
+                except Exception:
                     pass
-            if verbose:
-                log_info('Copy error: {}'.format(target))
-                log_info('----{}'.format(str(e)))
+            vcs_logger.log_error('Copy error: {}'.format(target))
+            vcs_logger.log_error('----{}'.format(str(e)))
             return 0
-        if verbose:
-            log_info('Copied: {}'.format(target))
+        vcs_logger.log_debug('Copied: {}'.format(target))
         return 1
 
 
-def batch_copy(path_pair, overwrite=0, verbose=0):
+def batch_copy(path_pair, vcs_logger, overwrite=0):
     """
     Args:
         path_pair (list of 2-tuple): List of 2-tuple of str, [(source, target),...]
@@ -167,32 +251,32 @@ def batch_copy(path_pair, overwrite=0, verbose=0):
 
     copied = []
     for source, target in path_pair:
-        if copy_file(source, target, overwrite, verbose=verbose):
+        if copy_file(source, target, vcs_logger, overwrite):
             copied.append(str(target))
 
     return copied
 
 
-def load_json(json_path, verbose=0):
+def load_json(json_path, vcs_logger):
     """
     Args:
         json_path (str|Path):
-
+    Returns:
+        dict:
     """
 
-    json_path = Path(json_path)
-    if not json_path.exists():
-        if verbose:
-            log_info('JSON not found: {}'.format(json_path))
+    json_path = str(json_path)
+
+    if not Path(json_path).exists():
+        vcs_logger.log_debug('JSON not found: {}'.format(json_path))
         return {}
 
     with open(str(json_path), 'r') as f:
-        if verbose:
-            log_info('Loaded JSON: {}'.format(json_path))
+        vcs_logger.log_debug('Loaded JSON: {}'.format(json_path))
         return json.loads(f.read())
 
 
-def save_json(data, json_path, verbose=0):
+def save_json(data, json_path, vcs_logger):
     """
     Args:
         json_path (str|Path):
@@ -200,12 +284,13 @@ def save_json(data, json_path, verbose=0):
     """
 
     json_path = Path(json_path)
+
     if not json_path.parent.exists():
         json_path.parent.mkdir(parents=1)
+
     with open(str(json_path), 'w') as f:
         f.write(json.dumps(data, indent=2))
-        if verbose:
-            log_info('Saved JSON: {}'.format(json_path))
+        vcs_logger.log_debug('Saved JSON: {}'.format(str(json_path)))
 
 
 def check_type(obj, types, raise_exception=1):
@@ -236,8 +321,9 @@ def check_type(obj, types, raise_exception=1):
         return 0
 
 
-def make_hidden(input_path):
+def make_hidden(input_path, vcs_logger):
     """Make file/folder hidden ( window only so far )
+
     Args:
         input_path (str|Path):
     """
@@ -247,5 +333,5 @@ def make_hidden(input_path):
     try:
         os.system('attrib +h {}'.format(input_path))
     except Exception as e:
-        log_error('Cannot make hidden: {}'.format(input_path))
-        log_error(str(e))
+        vcs_logger.log_error('Cannot make hidden: {}'.format(input_path))
+        vcs_logger.log_error('----'.format(str(e)))

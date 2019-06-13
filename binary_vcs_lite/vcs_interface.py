@@ -22,6 +22,7 @@ class VersioningInterface(object):
         all_revision(session_id)
         all_session()
         detail_file_version(session_id, revision, relative_path)
+        ls_changes()
     """
 
     def __init__(self, workspace_dir, repo_dir, session_id, init_workspace, init_repo):

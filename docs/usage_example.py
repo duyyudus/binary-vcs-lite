@@ -25,37 +25,36 @@ ASSET_FILE_PATTERN = {
     ]
 }
 
+# We have 2 workspaces with 2 corresponding local repos
+#   These local repos store "wip" session data
+# And one central repo which is connected to by 2 workspaces
+#   This repo stores "review" and "publish" session data
+# All these repos are independent of each other
+#
+WORKSPACE_1_DIR = _TEST_ROOT.joinpath('workspace_1')
+WORKSPACE_2_DIR = _TEST_ROOT.joinpath('workspace_2')
+CENTRAL_REPO_DIR = _TEST_ROOT.joinpath('central_repo')
+
 
 def init():
-    # We have 2 workspaces with 2 corresponding local repos
-    #   These local repos store "wip" session data
-    # And one central repo which is connected to by 2 workspaces
-    #   This repo stores "review" and "publish" session data
-    # All these repos are independent of each other
-    #
-    workspace_1_dir = _TEST_ROOT.joinpath('workspace_1')
-    workspace_2_dir = _TEST_ROOT.joinpath('workspace_2')
-    central_repo_dir = _TEST_ROOT.joinpath('central_repo')
-
     # Local versioning with workspace 1
-    ws_1_local = LocalVersioning(workspace_1_dir, 'wip')
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
 
     # Local versioning with workspace 2
-    ws_2_local = LocalVersioning(workspace_2_dir, 'wip')
+    ws_2_local = LocalVersioning(WORKSPACE_2_DIR, 'wip')
 
     # Remote versioning with workspace 1
-    ws_1_remote = RemoteVersioning(workspace_1_dir, central_repo_dir, 'review')
+    ws_1_remote = RemoteVersioning(WORKSPACE_1_DIR, CENTRAL_REPO_DIR, 'review')
 
     # Remote versioning with workspace 2
-    ws_2_remote = RemoteVersioning(workspace_2_dir, central_repo_dir, 'review')
+    ws_2_remote = RemoteVersioning(WORKSPACE_2_DIR, CENTRAL_REPO_DIR, 'review')
 
     return ws_1_local, ws_2_local, ws_1_remote, ws_2_remote
 
 
 def standard_commit():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
-
     # Commit to local repo
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_local.commit(
         ['wip'],
@@ -65,6 +64,7 @@ def standard_commit():
     )
 
     # Commit to remote repo
+    ws_1_remote = RemoteVersioning(WORKSPACE_1_DIR, CENTRAL_REPO_DIR, 'review')
     ws_1_remote.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_remote.commit(
         ['review'],
@@ -75,17 +75,15 @@ def standard_commit():
 
 
 def ls_changes():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
-
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
-    log_info('Listing changes')
-    log_info(ws_1_local.ls_changes())
+    print('Listing changes')
+    print(ws_1_local.ls_changes())
 
 
 def add_only_commit():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
-
     # Commit to local repo
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_local.commit(
         ['wip'],
@@ -95,6 +93,7 @@ def add_only_commit():
     )
 
     # Commit to remote repo
+    ws_1_remote = RemoteVersioning(WORKSPACE_1_DIR, CENTRAL_REPO_DIR, 'review')
     ws_1_remote.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_remote.commit(
         ['review'],
@@ -105,20 +104,17 @@ def add_only_commit():
 
 
 def checkout():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
-
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.checkout('wip', ws_1_local.latest_revision('wip'))
 
 
 def checkout_overwrite():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
-
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.checkout('wip', ws_1_local.latest_revision('wip'), overwrite=1)
 
 
 def checkout_custom_dir():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
-
+    ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.checkout(
         'wip',
         ws_1_local.latest_revision('wip'),
@@ -127,7 +123,7 @@ def checkout_custom_dir():
 
 
 def fast_forward_commit():
-    ws_1_local, ws_2_local, ws_1_remote, ws_2_remote = init()
+    ws_2_remote = RemoteVersioning(WORKSPACE_2_DIR, CENTRAL_REPO_DIR, 'review')
 
     # Commit to remote repo
     ws_2_remote.set_file_pattern(ASSET_FILE_PATTERN)
@@ -140,12 +136,13 @@ def fast_forward_commit():
 
 
 if __name__ == '__main__':
+    set_global_log_level(1)
     # init()
-    # standard_commit()
+    standard_commit()
     # ls_changes()
-    # add_only_commit()
+    add_only_commit()
     # checkout()
     # checkout_overwrite()
     # checkout_custom_dir()
-    # fast_forward_commit()
+    fast_forward_commit()
     pass

@@ -3,6 +3,11 @@ from binary_vcs_lite.common.hashing import WorkspaceHash
 from binary_vcs_lite.common import hashing
 from tree_util_lite.core.tree import Tree
 
+_vcs_logger = VcsLogger()
+log_info = _vcs_logger.log_info
+log_debug = _vcs_logger.log_debug
+log_error = _vcs_logger.log_error
+
 
 class StateTree(Tree):
     """A tree represent for file hierarchy state.
@@ -70,8 +75,18 @@ class State(object):
         self._data = {}
         self._previous = None
         self._next = None
+
+        self._enable_log()
+
         if self._state_file.exists():
             self.load()
+
+    def _enable_log(self):
+        log_file = Path(self._state_file.parent.parent, LOG_FOLDER, '_{}_{}.txt'.format(
+            os.environ['username'],
+            time.strftime('%Y-%m-%d')
+        ))
+        _vcs_logger.setup(log_file, Path(__file__).stem)
 
     @property
     def state_id(self):
@@ -169,7 +184,7 @@ class State(object):
             session_list_key: self._session_list,
             data_key: self._data
         }
-        save_json(data, self._state_file)
+        save_json(data, self._state_file, _vcs_logger)
         return True
 
     def load(self):
@@ -183,7 +198,7 @@ class State(object):
         session_list_key = STATE['CONTENT']['SESSION_LIST_KEY']
         data_key = STATE['CONTENT']['DATA_KEY']
 
-        data = load_json(self._state_file)
+        data = load_json(self._state_file, _vcs_logger)
         workspace_hash = hashing.workspace_hash_from_paths(data[file_key])
 
         self._state_tree = StateTree(workspace_hash)

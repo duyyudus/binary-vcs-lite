@@ -5,6 +5,11 @@ from binary_vcs_lite.common.util import *
 from binary_vcs_lite.common.hashing import WorkspaceHash
 from .state import State
 
+_vcs_logger = VcsLogger()
+log_info = _vcs_logger.log_info
+log_debug = _vcs_logger.log_debug
+log_error = _vcs_logger.log_error
+
 
 class StateNotFound(VcsLiteError):
     """State not found."""
@@ -57,6 +62,9 @@ class StateChain(object):
         self._state_dir = state_dir
         self._all_state_id = []
         self._state_data = {}
+
+        self._enable_log()
+
         for f in state_dir.iterdir():
             self.load_state(f)
 
@@ -64,6 +72,13 @@ class StateChain(object):
         """For unit test only."""
         self._all_state_id = []
         self._state_data = {}
+
+    def _enable_log(self):
+        log_file = Path(self._state_dir.parent, LOG_FOLDER, '_{}_{}.txt'.format(
+            os.environ['username'],
+            time.strftime('%Y-%m-%d')
+        ))
+        _vcs_logger.setup(log_file, Path(__file__).stem)
 
     @property
     def state_dir(self):

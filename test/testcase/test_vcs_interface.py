@@ -37,7 +37,6 @@ class TestVersioningInterface(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        log_info()
         vi = VersioningInterface(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
             repo_dir=TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
@@ -51,7 +50,6 @@ class TestVersioningInterface(unittest.TestCase):
         self.assertTrue(vi.repo.deep_dir.exists())
 
     def test_properties(self):
-        log_info()
         vi = VersioningInterface(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
             repo_dir=TEST_OUTPUT_DATA_LOCAL_REPO_DIR,
@@ -63,7 +61,6 @@ class TestVersioningInterface(unittest.TestCase):
         self.assertIs(vi.workspace, vi._workspace)
 
     def test_operations(self):
-        log_info()
 
         # Test commit() on "review" session
         vi = VersioningInterface(
@@ -127,7 +124,6 @@ class TestLocalVersioning(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        log_info()
         vi = LocalVersioning(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
             session_id='review'
@@ -165,7 +161,6 @@ class TestRemoteVersioning(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        log_info()
         vi = RemoteVersioning(
             workspace_dir=TEST_OUTPUT_DATA_WORKSPACE_DIR,
             repo_dir=TEST_OUTPUT_DATA_REMOTE_REPO_DIR,
@@ -179,6 +174,7 @@ class TestRemoteVersioning(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    set_global_log_level(4)
     testcase_classes = [
         TestVersioningInterface,
         TestLocalVersioning,

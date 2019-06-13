@@ -2,6 +2,11 @@ from binary_vcs_lite.common.util import *
 from .session import Session
 from .state_chain import StateChain
 
+_vcs_logger = VcsLogger()
+log_info = _vcs_logger.log_info
+log_debug = _vcs_logger.log_debug
+log_error = _vcs_logger.log_error
+
 
 class SessionNotFound(VcsLiteError):
     """Session not found."""
@@ -68,6 +73,9 @@ class SessionManager(object):
             self._state_chain = state_chain
         else:
             raise MissingStateChain()
+
+        self._enable_log()
+
         for f in session_dir.iterdir():
             self.load_session(f)
 
@@ -75,6 +83,13 @@ class SessionManager(object):
         """For unit test only."""
         self._all_session_id = []
         self._session_data = {}
+
+    def _enable_log(self):
+        log_file = Path(self._session_dir.parent, LOG_FOLDER, '_{}_{}.txt'.format(
+            os.environ['username'],
+            time.strftime('%Y-%m-%d')
+        ))
+        _vcs_logger.setup(log_file, Path(__file__).stem)
 
     @property
     def session_dir(self):

@@ -57,11 +57,15 @@ class WorkspaceHash(dict):
         Args:
             target_dir (str|Path):
         """
+        check_type(target_dir, [str, Path])
+
         self._workspace_dir = target_dir
         if target_dir:
             self.update_abs_path()
 
     def update_abs_path(self):
+        """Update absolute path using `self._workspace_dir`"""
+
         for f in self:
             abs_path = Path(self._workspace_dir, self[f][WORKSPACE_HASH['RELATIVE_PATH_KEY']])
             self[f][WORKSPACE_HASH['ABSOLUTE_PATH_KEY']] = abs_path.as_posix()
@@ -74,6 +78,8 @@ class WorkspaceHash(dict):
         Returns:
             str:
         """
+        check_type(hash_value, [str])
+
         for file_id in self:
             if hash_value == self[file_id][WORKSPACE_HASH['HASH_KEY']]:
                 return self[file_id][WORKSPACE_HASH['RELATIVE_PATH_KEY']]
@@ -135,7 +141,7 @@ def hash_str(input_str):
 # @_time_measure
 def hash_workspace(workspace_dir,
                    file_pattern=DEFAULT_FILE_PATTERN,
-                   verbose=0):
+                   vcs_logger=VcsLogger()):
     """Scan input working directory and return `WorkspaceHash` data.
 
     This is the only way to create a new `WorkspaceHash` instance.
@@ -157,7 +163,7 @@ def hash_workspace(workspace_dir,
     check_type(workspace_dir, [str, Path])
     check_type(file_pattern, [dict])
 
-    log_info('Hashing workspace: {}'.format(str(workspace_dir)))
+    vcs_logger.log_info('Hashing workspace: {}'.format(str(workspace_dir)))
 
     # Need this in case None is passed into pattern value
     include_pattern = file_pattern['INCLUDE'] if file_pattern else DEFAULT_FILE_PATTERN['INCLUDE']
@@ -169,32 +175,33 @@ def hash_workspace(workspace_dir,
     for pattern in include_pattern:
         all_paths.extend(workspace_dir.glob(pattern))
 
-    if verbose:
-        log_info('Hash digest info:')
+    vcs_logger.log_debug('Hash digest info:')
     for p in all_paths:
         if match_regex_pattern(str(p), exclude_pattern):
+            continue
+        if Path(p).is_dir():
             continue
         try:
             rel_path = p.relative_to(workspace_dir)
             hash_data = hash_file(p)
-            if verbose:
-                log_info('{}: {}'.format(str(p), hash_data))
+            vcs_logger.log_debug('{}: {}'.format(str(p), hash_data))
+
             workspace_hash[rel_path.as_posix()] = {
                 WORKSPACE_HASH['HASH_KEY']: hash_data,
                 WORKSPACE_HASH['RELATIVE_PATH_KEY']: str(rel_path)
             }
         except Exception as e:
-            if verbose:
-                log_info('Skipped: {}'.format(str(p)))
-                log_info('----Error: {}'.format(e))
+            vcs_logger.log_error('Skipped hashing file: {}'.format(str(p)))
+            vcs_logger.log_error('----Error: {}'.format(e))
 
     workspace_hash.set_workspace_dir(workspace_dir)
-    log_info('Hashing completed')
+    vcs_logger.log_info('Hashing completed')
     return workspace_hash
 
 
 def workspace_hash_from_paths(paths):
-    """
+    """Create instance of `WorkspaceHash` from a list of file paths and their hashes
+
     Args:
         paths (list of str): paths with data as suffix
     Returns:

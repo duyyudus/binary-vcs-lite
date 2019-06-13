@@ -39,7 +39,6 @@ class TestSessionManager(unittest.TestCase):
         cleanup_output_data()
 
     def test_properties(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
         sm = SessionManager(self.sample_session_dir, sc)
 
@@ -48,7 +47,6 @@ class TestSessionManager(unittest.TestCase):
         self.assertIs(sm.session_data, sm._session_data)
 
     def test_init(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
         sm = SessionManager(self.sample_session_dir, sc)
         self.assertEqual(sm.session_dir, self.sample_session_dir)
@@ -59,7 +57,7 @@ class TestSessionManager(unittest.TestCase):
             self.assertEqual(sm.session_data[session_id].session_id, session_id)
 
         try:
-            sm = SessionManager('not/exists/dir', sc)
+            sm = SessionManager('/not/exists/dir', sc)
         except Exception as e:
             self.assertTrue(check_type(e, [session_manager.InvalidRepoSession]))
         try:
@@ -68,7 +66,6 @@ class TestSessionManager(unittest.TestCase):
             self.assertTrue(check_type(e, [session_manager.MissingStateChain]))
 
     def test_load_session(self):
-        log_info()
         session_id = 'review'
         session_file = self.sample_session_dir.joinpath(session_id)
 
@@ -86,7 +83,6 @@ class TestSessionManager(unittest.TestCase):
             self.assertTrue(check_type(e, [session_manager.InvalidSession]))
 
     def test_new_session(self):
-        log_info()
         sc = StateChain(self.output_state_dir)
         sm = SessionManager(self.output_session_dir, sc)
         sm._reset()
@@ -102,7 +98,6 @@ class TestSessionManager(unittest.TestCase):
             self.assertTrue(check_type(e, [session_manager.ClashingSession]))
 
     def test_update_session(self):
-        log_info()
         sc = StateChain(self.output_state_dir)
         sm = SessionManager(self.output_session_dir, sc)
         sm._reset()
@@ -114,7 +109,6 @@ class TestSessionManager(unittest.TestCase):
             self.assertGreater(len(sm.session_data[session_id].revision_data), 0)
 
     def test_detail_file_version(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
         sm = SessionManager(self.sample_session_dir, sc)
 
@@ -130,7 +124,6 @@ class TestSessionManager(unittest.TestCase):
             self.assertTrue(check_type(e, [session_manager.SessionNotFound]))
 
     def test_get_session(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
         sm = SessionManager(self.sample_session_dir, sc)
 
@@ -145,6 +138,7 @@ class TestSessionManager(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    set_global_log_level(4)
     testcase_classes = [
         TestSessionManager,
     ]

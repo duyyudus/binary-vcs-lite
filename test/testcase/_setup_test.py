@@ -44,11 +44,6 @@ TEST_OUTPUT_DATA_LOCAL_REPO_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('last'))
 TEST_OUTPUT_DATA_REMOTE_REPO_DIR = str(Path(TEST_OUTPUT_DATA).joinpath('remote_last'))
 
 
-def cleanup_output_data():
-    if Path(TEST_OUTPUT_DATA).exists():
-        shutil.rmtree(TEST_OUTPUT_DATA)
-
-
 def create_output_workspace_dir():
     """Copy from sample workspace dir to output folder."""
     for p in Path(TEST_SAMPLE_DATA_WORKSPACE_DIR).iterdir():
@@ -70,8 +65,15 @@ def create_output_repo_dir(local=1):
             shutil.copytree(str(p), str(target))
 
 
+def cleanup_output_data():
+    logging.shutdown()
+    if Path(TEST_OUTPUT_DATA).exists():
+        shutil.rmtree(TEST_OUTPUT_DATA)
+
+
 def cleanup_output_workspace_dir():
     """Clean output workspace dir."""
+    logging.shutdown()
     for p in Path(TEST_OUTPUT_DATA_WORKSPACE_DIR).iterdir():
         if p.name != VCS_FOLDER:
             shutil.rmtree(str(p))
@@ -79,6 +81,7 @@ def cleanup_output_workspace_dir():
 
 def cleanup_output_repo_dir():
     """Clean output repo dir."""
+    logging.shutdown()
     for p in Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).iterdir():
         if p.name == VCS_FOLDER:
             shutil.rmtree(str(p))
@@ -136,7 +139,7 @@ def log_test(testcase_path):
     def _log_test(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            switch_log_vcs(0)
+            set_global_log_level(0)
             start_log_test(testcase_path)
             func(*args, **kwargs)
             end_log_test(testcase_path)

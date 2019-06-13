@@ -26,7 +26,6 @@ class TestStateChain(unittest.TestCase):
         cleanup_output_data()
 
     def test_properties(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
 
         self.assertIs(sc.state_dir, sc._state_dir)
@@ -35,7 +34,6 @@ class TestStateChain(unittest.TestCase):
         self.assertIs(sc.last_state, sc.state_data[sc.all_state_id[-1]])
 
     def test_init(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
         self.assertEqual(sc.state_dir, self.sample_state_dir)
 
@@ -45,12 +43,11 @@ class TestStateChain(unittest.TestCase):
             self.assertEqual(sc.state_data[i].state_id, i)
 
         try:
-            sc = StateChain('not/exists/dir')
+            sc = StateChain('/not/exists/dir')
         except Exception as e:
             self.assertTrue(check_type(e, [state_chain.InvalidRepoState]))
 
     def test_load_state(self):
-        log_info()
         s0_file = self.sample_state_dir.joinpath('s0')
         s1_file = self.sample_state_dir.joinpath('s1')
 
@@ -65,13 +62,12 @@ class TestStateChain(unittest.TestCase):
         self.assertIs(sc.state_data['s1'].previous, sc.state_data['s0'])
 
         try:
-            sc.load_state('not/under/same/state_dir/state')
+            sc.load_state('/not/under/same/state_dir/state')
         except Exception as e:
             self.assertTrue(check_type(e, [state_chain.InvalidState]))
 
     def test_new_state(self):
-        log_info()
-        workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
+        workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, vcs_logger=VcsLogger())
         sc = StateChain(self.output_state_dir)
         new_state = sc.new_state(
             workspace_hash,
@@ -95,7 +91,6 @@ class TestStateChain(unittest.TestCase):
         os.remove(str(new_state.state_file))
 
     def test_get_state(self):
-        log_info()
         sc = StateChain(self.sample_state_dir)
         s0 = sc.get_state('s0')
         self.assertEqual(s0.state_id, 's0')
@@ -108,6 +103,7 @@ class TestStateChain(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    set_global_log_level(4)
     testcase_classes = [
         TestStateChain,
     ]

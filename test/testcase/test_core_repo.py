@@ -31,7 +31,6 @@ class TestRepo(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
 
         self.assertTrue(check_type(rp.repo_id, [str]))
@@ -51,24 +50,22 @@ class TestRepo(unittest.TestCase):
         self.assertEqual(rp._state_chain.state_dir, self.output_state_dir)
         self.assertEqual(rp._blob.blob_dir, self.output_blob_dir)
 
-        repo_metadata = load_json(rp._metadata_path)
+        repo_metadata = load_json(rp._metadata_path, VcsLogger())
         repo_id = repo_metadata[REPO['METADATA']['REPO_ID_KEY']]
         self.assertEqual(rp.repo_id, repo_id)
 
         try:
-            Repo('not/exists/dir', init=0)
+            Repo('/not/exists/dir', init=0)
         except Exception as e:
             self.assertTrue(check_type(e, [repo.RepoNotFound]))
 
     def test_properties(self):
-        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
         self.assertIs(rp.repo_dir, rp._repo_dir)
         self.assertIs(rp.deep_dir, rp._deep_dir)
         self.assertIs(rp.repo_id, rp._repo_id)
 
     def test_operations(self):
-        log_info()
         shutil.rmtree(TEST_OUTPUT_DATA_LOCAL_REPO_DIR)
 
         sample_workspace_list_dir = Path(TEST_SAMPLE_DATA_WORKSPACE_DIR).parent
@@ -95,7 +92,7 @@ class TestRepo(unittest.TestCase):
             cleanup_output_workspace_dir()
 
             current_wh = hashing.hash_workspace(current_workspace_dir)
-            rp.state_out(current_wh, 'review', v, overwrite=1, debug=0)
+            rp.state_out(current_wh, 'review', v, overwrite=1)
 
             sample_workspace_dir = sample_workspace_list_dir.joinpath(str(v))
             sample_wh = hashing.hash_workspace(sample_workspace_dir)
@@ -135,12 +132,18 @@ class TestRepo(unittest.TestCase):
         self.assertEqual(set(rp.all_session), set(['review', 'publish']))
 
         # Test detail_file_version()
-        valid_review_session = load_json(sample_workspace_list_dir.joinpath('_valid_review_session.json'))
-        valid_publish_session = load_json(sample_workspace_list_dir.joinpath('_valid_publish_session.json'))
+        valid_review_session = load_json(
+            sample_workspace_list_dir.joinpath('_valid_review_session.json'),
+            VcsLogger()
+        )
+        valid_publish_session = load_json(
+            sample_workspace_list_dir.joinpath('_valid_publish_session.json'),
+            VcsLogger()
+        )
 
         # Session "review" with latest version 7
-        log_info(rp.detail_file_version('review'))
-        log_info(valid_review_session[SESSION['CONTENT']['DETAIL_VERSION_KEY']]['7'])
+        print(rp.detail_file_version('review'))
+        print(valid_review_session[SESSION['CONTENT']['DETAIL_VERSION_KEY']]['7'])
         self.assertEqual(
             rp.detail_file_version('review'),
             valid_review_session[SESSION['CONTENT']['DETAIL_VERSION_KEY']]['7']
@@ -159,7 +162,7 @@ class TestRepo(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(0)
+    set_global_log_level(4)
     testcase_classes = [
         TestRepo,
     ]

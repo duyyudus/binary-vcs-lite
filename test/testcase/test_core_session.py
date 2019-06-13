@@ -35,7 +35,6 @@ class TestSession(unittest.TestCase):
         cleanup_output_data()
 
     def test_properties(self):
-        log_info()
         sess = Session(self.sample_session_file)
         self.assertIs(sess.session_id, sess._session_id)
         self.assertIs(sess.session_file, sess._session_file)
@@ -47,7 +46,6 @@ class TestSession(unittest.TestCase):
         self.assertEqual(sess.latest_revision, sess.all_revision[-1])
 
     def test_init(self):
-        log_info()
         sess = Session(self.sample_session_file)
         self.assertEqual(sess.session_id, self.sample_session_file.name)
         self.assertEqual(sess.session_file, self.sample_session_file)
@@ -55,7 +53,6 @@ class TestSession(unittest.TestCase):
         self.assertGreater(len(sess._detail_version_data), 0)
 
     def test_sync_from_state_chain_and_save(self):
-        log_info()
         if self.output_session_file.exists():
             os.remove(str(self.output_session_file))
 
@@ -65,7 +62,7 @@ class TestSession(unittest.TestCase):
         # save() is called in sync_from_state_chain()
         sess.sync_from_state_chain(state_chain)
 
-        valid_session = load_json(self.sample_session_file)
+        valid_session = load_json(self.sample_session_file, VcsLogger())
 
         # Test sync_from_state_chain()
         valid_revision_data = valid_session[SESSION['CONTENT']['REVISION_KEY']]
@@ -80,12 +77,11 @@ class TestSession(unittest.TestCase):
             self.assertEqual(valid_detail_version_data[rev], real_detail_version_data[rev])
 
         # Test save()
-        real_session = load_json(self.output_session_file)
+        real_session = load_json(self.output_session_file, VcsLogger())
         self.assertEqual(valid_session, real_session)
 
     def test_load(self):
-        log_info()
-        valid_session = load_json(self.sample_session_file)
+        valid_session = load_json(self.sample_session_file, VcsLogger())
 
         # load() is called in __init__()
         sess = Session(self.sample_session_file)
@@ -100,8 +96,7 @@ class TestSession(unittest.TestCase):
         )
 
     def test_detail_file_version(self):
-        log_info()
-        valid_session = load_json(self.sample_session_file)
+        valid_session = load_json(self.sample_session_file, VcsLogger())
         valid_revision_data = valid_session[SESSION['CONTENT']['REVISION_KEY']]
         valid_detail_version_data = valid_session[SESSION['CONTENT']['DETAIL_VERSION_KEY']]
         sess = Session(self.sample_session_file)
@@ -113,7 +108,7 @@ class TestSession(unittest.TestCase):
             )
 
         for p in valid_detail_version_data['1']:
-            log_info(p)
+            print(p)
             self.assertEqual(
                 sess.detail_file_version(1, relative_path=p),
                 {p: valid_detail_version_data['1'][p]}
@@ -127,7 +122,7 @@ class TestSession(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(0)
+    set_global_log_level(4)
     testcase_classes = [
         TestSession,
     ]

@@ -2,9 +2,18 @@ from binary_vcs_lite.common.util import *
 from binary_vcs_lite.common import hashing
 from binary_vcs_lite.core.repo import Repo
 
+_vcs_logger = VcsLogger()
+log_info = _vcs_logger.log_info
+log_debug = _vcs_logger.log_debug
+log_error = _vcs_logger.log_error
+
 
 class WorkspaceNotFound(VcsLiteError):
     """There is no repo folder."""
+
+
+class InvalidWorkspace(VcsLiteError):
+    """There is no METADATA file."""
 
 
 class Workspace(object):
@@ -64,18 +73,30 @@ class Workspace(object):
         check_type(session_id, [str])
 
         workspace_dir = Path(workspace_dir)
-        self._workspace_dir = workspace_dir
+        self._workspace_dir = workspace_dir.resolve()
         self._deep_dir = self._workspace_dir.joinpath(VCS_FOLDER, WORKSPACE['FOLDER'])
         self._metadata_path = self._deep_dir.joinpath(WORKSPACE['METADATA']['FILE'])
 
-        if init and not self._deep_dir.exists():
+        if init and not self._metadata_path.exists():
             self._deep_dir.mkdir(parents=1, exist_ok=1)
-            make_hidden(self._deep_dir.parent)
         elif not self._deep_dir.exists():
             raise WorkspaceNotFound()
+        elif not self._metadata_path.exists():
+            raise InvalidWorkspace()
+
+        self._enable_log()
+
+        make_hidden(self._deep_dir.parent, _vcs_logger)
 
         self.connect_repo(repo, session_id)
         self.set_file_pattern(DEFAULT_FILE_PATTERN)
+
+    def _enable_log(self):
+        log_file = Path(self._deep_dir, LOG_FOLDER, '_{}_{}.txt'.format(
+            os.environ['username'],
+            time.strftime('%Y-%m-%d')
+        ))
+        _vcs_logger.setup(log_file, Path(__file__).stem)
 
     @property
     def file_pattern(self):
@@ -115,7 +136,11 @@ class Workspace(object):
     @property
     def workspace_hash(self):
         """WorkspaceHash: """
-        return hashing.hash_workspace(self._workspace_dir, file_pattern=self._file_pattern)
+        return hashing.hash_workspace(
+            self._workspace_dir,
+            file_pattern=self._file_pattern,
+            vcs_logger=_vcs_logger
+        )
 
     def set_file_pattern(self, file_pattern):
         """
@@ -139,6 +164,9 @@ class Workspace(object):
         self._session_id = session_id
         self._revision = self.detect_revision()
         self.save()
+        log_info(' ')
+        log_info('Connected to repo: {}'.format(repo.repo_id))
+        log_info('----{}'.format(repo.repo_dir))
 
     def absolute_path(self, hash_value):
         """
@@ -148,7 +176,7 @@ class Workspace(object):
         check_type(hash_value, [str])
         return self.workspace_hash.hash_to_path(hash_value)
 
-    def commit(self, session_list, data, add_only, fast_forward, debug=0):
+    def commit(self, session_list, data, add_only, fast_forward):
         """
         Args:
             session_list (list of str):
@@ -162,10 +190,12 @@ class Workspace(object):
         current_session_id = self.session_id
         current_revision = self.revision
 
-        if debug:
-            log_info('Commit ::')
-            log_info('----current_session_id: {}'.format(current_session_id))
-            log_info('----current_revision: {}'.format(current_revision))
+        log_info('Commit ::')
+        log_info('----session_list: {}'.format(str(session_list)))
+        log_info('----add_only: {}'.format(add_only))
+        log_info('----fast_forward: {}'.format(fast_forward))
+        log_info('----current_session_id: {}'.format(current_session_id))
+        log_info('----current_revision: {}'.format(current_revision))
 
         if fast_forward and current_session_id in session_list:
             current_revision = self._repo.latest_revision(current_session_id)
@@ -183,6 +213,7 @@ class Workspace(object):
             if current_session_id in session_list:
                 self._revision += 1
                 self.save()
+
         log_info('Commit succeed')
 
     def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
@@ -197,6 +228,12 @@ class Workspace(object):
         check_type(revision, [int])
         check_type(checkout_dir, [str, Path, type(None)])
 
+        log_info('Checkout ::')
+        log_info('----session_id: {}'.format(session_id))
+        log_info('----revision: {}'.format(revision))
+        log_info('----checkout_dir: {}'.format(str(checkout_dir)))
+        log_info('----overwrite: {}'.format(str(overwrite)))
+
         ws_hash = self.workspace_hash
         if checkout_dir:
             ws_hash.set_workspace_dir(checkout_dir)
@@ -205,6 +242,7 @@ class Workspace(object):
             self._session_id = session_id
             self._revision = revision
             self.save()
+
         log_info('Checkout succeed')
 
     def save(self):
@@ -215,7 +253,7 @@ class Workspace(object):
         session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
         revision_key = WORKSPACE['METADATA']['REVISION_KEY']
 
-        data = load_json(self._metadata_path)
+        data = load_json(self._metadata_path, _vcs_logger)
         if repo_record_key in data:
             repo_record = data[repo_record_key]
         else:
@@ -226,7 +264,7 @@ class Workspace(object):
             revision_key: self._revision
         }
         data[repo_record_key] = repo_record
-        save_json(data, self._metadata_path)
+        save_json(data, self._metadata_path, _vcs_logger)
 
     def load(self):
         """Load workspace info from METADATA file."""
@@ -235,7 +273,7 @@ class Workspace(object):
         session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
         revision_key = WORKSPACE['METADATA']['REVISION_KEY']
 
-        data = load_json(self._metadata_path)
+        data = load_json(self._metadata_path, _vcs_logger)
         if repo_record_key not in data:
             return
         repo_record = data[repo_record_key]
@@ -243,7 +281,7 @@ class Workspace(object):
             self._session_id = repo_record[self.repo_id][session_id_key]
             self._revision = repo_record[self.repo_id][revision_key]
 
-    def detect_revision(self, debug=0):
+    def detect_revision(self):
         """Detect revision for current session.
 
         If recorded in METADATA and valid, use that value, otherwise use latest revision from repo
@@ -255,11 +293,10 @@ class Workspace(object):
         session_id_key = WORKSPACE['METADATA']['SESSION_ID_KEY']
         revision_key = WORKSPACE['METADATA']['REVISION_KEY']
 
-        data = load_json(self._metadata_path)
+        data = load_json(self._metadata_path, _vcs_logger)
 
-        if debug:
-            log_info('Detect Revision ::')
-            log_info(data)
+        log_debug('Detect Revision ::')
+        log_debug(data)
 
         if repo_record_key in data:
             repo_record = data[repo_record_key]

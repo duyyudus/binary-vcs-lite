@@ -33,7 +33,6 @@ class TestWorkspace(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
         ws = Workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, rp, 'review', init=1)
 
@@ -46,7 +45,6 @@ class TestWorkspace(unittest.TestCase):
         self.assertEqual(ws.file_pattern['EXCLUDE'], DEFAULT_FILE_PATTERN['EXCLUDE'])
 
     def test_properties(self):
-        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
         ws = Workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR, rp, 'review', init=1)
         self.assertIs(ws.file_pattern, ws._file_pattern)
@@ -59,7 +57,6 @@ class TestWorkspace(unittest.TestCase):
             self.assertIn(f, ws.workspace_hash)
 
     def test_operations(self):
-        log_info()
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
 
         # Test commit() on "review" session
@@ -92,7 +89,7 @@ class TestWorkspace(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    switch_log_vcs(0)
+    set_global_log_level(4)
     testcase_classes = [
         TestWorkspace,
     ]

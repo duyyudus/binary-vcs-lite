@@ -42,7 +42,6 @@ class TestState(unittest.TestCase):
         self.assertTrue(check_type(s0.timestamp, [str]))
 
     def test_properties(self):
-        log_info()
 
         s0 = State(self.sample_state_file)
 
@@ -56,7 +55,6 @@ class TestState(unittest.TestCase):
         self.assertIs(s0.next, s0._next)
 
     def test_update_and_save(self):
-        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         s0 = State(self.output_state_file)
 
@@ -80,7 +78,7 @@ class TestState(unittest.TestCase):
         self.assertGreater(len(s0.data.values()), 0)
 
         # Test save()
-        valid_data = load_json(self.output_state_file)
+        valid_data = load_json(self.output_state_file, VcsLogger())
         self.assertEqual(
             valid_data[STATE['CONTENT']['TIMESTAMP_KEY']],
             s0.timestamp
@@ -100,7 +98,6 @@ class TestState(unittest.TestCase):
             self.assertGreater(len(n), 0)
 
     def test_set_next(self):
-        log_info()
         s0 = State('path/to/s0')
         s1 = State('path/to/s1')
         s0.set_next(s1)
@@ -108,7 +105,6 @@ class TestState(unittest.TestCase):
         self.assertIs(s1.previous, s0)
 
     def test_set_previous(self):
-        log_info()
         s0 = State('path/to/s0')
         s1 = State('path/to/s1')
         s1.set_previous(s0)
@@ -116,12 +112,11 @@ class TestState(unittest.TestCase):
         self.assertIs(s1.previous, s0)
 
     def test_load(self):
-        log_info()
 
         # load() is called in __init__()
         s0 = State(self.sample_state_file)
 
-        valid_data = load_json(self.sample_state_file)
+        valid_data = load_json(self.sample_state_file, VcsLogger())
         self.assertEqual(
             valid_data[STATE['CONTENT']['TIMESTAMP_KEY']],
             s0.timestamp
@@ -141,10 +136,9 @@ class TestState(unittest.TestCase):
             self.assertGreater(len(n), 0)
 
     def test_to_workspace_hash(self):
-        log_info()
 
         s0 = State(self.sample_state_file)
-        valid_data = load_json(self.sample_state_file)
+        valid_data = load_json(self.sample_state_file, VcsLogger())
         real_workspace_hash = s0.to_workspace_hash()
         for k in valid_data[STATE['CONTENT']['FILE_KEY']]:
             p, d = tree.separate_path_data(k)
@@ -164,7 +158,6 @@ class TestStateTree(unittest.TestCase):
         cleanup_output_data()
 
     def test_init(self):
-        log_info()
         workspace_hash = hashing.hash_workspace(TEST_OUTPUT_DATA_WORKSPACE_DIR)
         state_tree = StateTree(workspace_hash)
         for v in workspace_hash.values():
@@ -177,6 +170,7 @@ class TestStateTree(unittest.TestCase):
 
 @log_test(__file__)
 def run():
+    set_global_log_level(4)
     testcase_classes = [
         TestState,
         TestStateTree

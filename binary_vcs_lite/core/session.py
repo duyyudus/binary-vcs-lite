@@ -1,6 +1,11 @@
 from binary_vcs_lite.common.util import *
 from .state_chain import StateChain
 
+_vcs_logger = VcsLogger()
+log_info = _vcs_logger.log_info
+log_debug = _vcs_logger.log_debug
+log_error = _vcs_logger.log_error
+
 
 class RevisionNotFound(VcsLiteError):
     """Revision not found."""
@@ -44,8 +49,18 @@ class Session(object):
         self._session_id = session_file.name
         self._revision_data = {}
         self._detail_version_data = {}
+
+        self._enable_log()
+
         if session_file.exists():
             self.load()
+
+    def _enable_log(self):
+        log_file = Path(self._session_file.parent.parent, LOG_FOLDER, '_{}_{}.txt'.format(
+            os.environ['username'],
+            time.strftime('%Y-%m-%d')
+        ))
+        _vcs_logger.setup(log_file, Path(__file__).stem)
 
     @property
     def session_id(self):
@@ -73,7 +88,7 @@ class Session(object):
         all_rev = self.all_revision
         return all_rev[-1] if all_rev else 0
 
-    def sync_from_state_chain(self, state_chain, debug=0):
+    def sync_from_state_chain(self, state_chain):
         """
         Args:
             state_chain (StateChain):
@@ -107,11 +122,11 @@ class Session(object):
             s1 = state_chain.state_data[s1_id]
             s2 = state_chain.state_data[s2_id]
             state_diff = state_chain.compare_state(s1, s2, return_path=1)
-            if debug:
-                log_info('DEBUG :: sync_from_state_chain()')
-                log_info('State diff from "{}" to "{}"'.format(s1_id, s2_id))
-                log_info(state_diff)
-                log_info()
+
+            log_debug('Sync From State Chain ::')
+            log_debug('State diff from "{}" to "{}"'.format(s1_id, s2_id))
+            log_debug(state_diff)
+            log_debug()
 
             # Detail file version of previous revision
             if pre_rev in self._detail_version_data:
@@ -170,7 +185,7 @@ class Session(object):
         data = {}
         data[rev_key] = self._revision_data
         data[ver_key] = self._detail_version_data
-        save_json(data, self._session_file)
+        save_json(data, self._session_file, _vcs_logger)
         return 1
 
     def load(self):
@@ -181,7 +196,7 @@ class Session(object):
         """
         rev_key = SESSION['CONTENT']['REVISION_KEY']
         ver_key = SESSION['CONTENT']['DETAIL_VERSION_KEY']
-        data = load_json(self._session_file)
+        data = load_json(self._session_file, _vcs_logger)
         if rev_key not in data or ver_key not in data:
             return 0
         self._revision_data = data[rev_key]
