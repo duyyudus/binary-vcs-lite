@@ -24,17 +24,37 @@ _global_log_level = 0
 class VcsLiteError(Exception):
     """Base error for version control operations."""
 
-    def __init__(self, message=''):
+    def __init__(self, message='', vcs_logger=None):
         super(VcsLiteError, self).__init__()
         self._message = message
-        print('{}'.format(message))
+        if vcs_logger:
+            vcs_logger.log_error(message)
+        else:
+            print('{}'.format(message))
 
     def __str__(self):
         return self._message
 
 
+class PathMustBeAbsolute(VcsLiteError):
+    """Path must be absolute."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(PathMustBeAbsolute, self).__init__(message, vcs_logger)
+
+
 class InvalidType(VcsLiteError):
     """Invalid type."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidType, self).__init__(message, vcs_logger)
+
+
+class InvalidPath(VcsLiteError):
+    """Invalid path."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidPath, self).__init__(message, vcs_logger)
 
 
 class VcsLogger(object):
@@ -68,6 +88,12 @@ class VcsLogger(object):
         self.log_name = log_name
         self.lvl = self.lvl_map[_global_log_level] if _global_log_level else self.lvl_map[log_level]
 
+        # Remove root logger handlers first
+        root_logger = logging.getLogger()
+        if root_logger.handlers:
+            root_logger.handlers = []
+
+        # New logger
         self.logger = logging.getLogger(log_name)
         if self.logger.handlers:
             self.logger.handlers = []
@@ -291,6 +317,24 @@ def save_json(data, json_path, vcs_logger):
     with open(str(json_path), 'w') as f:
         f.write(json.dumps(data, indent=2))
         vcs_logger.log_debug('Saved JSON: {}'.format(str(json_path)))
+
+
+def check_path(input_path):
+    """
+    Args:
+        input_path (str|Path):
+    Raises:
+        PathMustBeAbsolute:
+        InvalidPath:
+    Returns:
+        bool:
+    """
+    input_path = Path(input_path)
+    if os.name == 'nt' and input_path.as_posix().startswith('/'):
+        raise InvalidPath('InvalidPath: {}'.format(input_path.as_posix()))
+    elif not (input_path.is_absolute() or input_path.as_posix().startswith('/')):
+        raise PathMustBeAbsolute('PathMustBeAbsolute: {}'.format(input_path.as_posix()))
+    return 1
 
 
 def check_type(obj, types, raise_exception=1):

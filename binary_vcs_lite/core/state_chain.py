@@ -14,13 +14,22 @@ log_error = _vcs_logger.log_error
 class StateNotFound(VcsLiteError):
     """State not found."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(StateNotFound, self).__init__(message, vcs_logger)
+
 
 class InvalidState(VcsLiteError):
     """State file is neither valid nor exist."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidState, self).__init__(message, vcs_logger)
+
 
 class InvalidRepoState(VcsLiteError):
     """There is no `state` folder in `.repo` folder."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidRepoState, self).__init__(message, vcs_logger)
 
 
 class StateChain(object):
@@ -56,12 +65,14 @@ class StateChain(object):
         check_type(state_dir, [str, Path])
 
         state_dir = Path(state_dir)
-        if not state_dir.exists():
-            raise InvalidRepoState()
 
         self._state_dir = state_dir
         self._all_state_id = []
         self._state_data = {}
+
+        if not state_dir.exists():
+            self._enable_log()
+            raise InvalidRepoState('InvalidRepoState: {}'.format(state_dir.as_posix()), _vcs_logger)
 
         self._enable_log()
 
@@ -113,11 +124,11 @@ class StateChain(object):
 
         state_file = Path(state_file)
         if state_file.parent != self._state_dir:
-            raise InvalidState()
+            raise InvalidState('InvalidState: {}'.format(state_file.as_posix()), _vcs_logger)
 
         s = State(state_file)
         if not s.load():
-            raise InvalidState()
+            raise InvalidState('InvalidState: {}'.format(state_file.as_posix()), _vcs_logger)
 
         if self.last_state:
             self.last_state.set_next(s)
@@ -197,6 +208,6 @@ class StateChain(object):
         check_type(state_id, [str])
 
         if state_id not in self._state_data:
-            raise StateNotFound()
+            raise StateNotFound('StateNotFound: {}'.format(state_id), _vcs_logger)
 
         return self._state_data[state_id]

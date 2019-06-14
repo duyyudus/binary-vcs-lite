@@ -61,6 +61,8 @@ class VersioningInterface(object):
     def commit(self, session_list, data, add_only, fast_forward):
         """Wrap same method in `self._workspace`
 
+        For all files match file pattern in workspace folder, commit them to repository
+
         Args:
             session_list (list of str):
             data (dict):
@@ -71,6 +73,8 @@ class VersioningInterface(object):
 
     def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
         """Wrap same method in `self._workspace`
+
+        Checkout all files belong to `session_id` and `revision` to workspace folder
 
         Args:
             session_id (str):
@@ -94,6 +98,8 @@ class VersioningInterface(object):
     def all_revision(self, session_id):
         """Wrap same method in `self._workspace`
 
+        All revisions of provided session
+
         Args:
             session_id (str):
 
@@ -104,6 +110,8 @@ class VersioningInterface(object):
 
     def all_session(self):
         """Wrap same method in `self._workspace`
+
+        All sessions in repo which we are connecting to
 
         Returns:
             list of str:
@@ -125,6 +133,8 @@ class VersioningInterface(object):
 
     def ls_changes(self):
         """Wrap same method in `self._workspace`
+
+        Detect changes between current workspace and latest revision of current session
 
         Returns:
             dict:

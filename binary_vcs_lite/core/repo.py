@@ -15,17 +15,29 @@ log_error = _vcs_logger.log_error
 class RepoNotFound(VcsLiteError):
     """There is no repo folder."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(RepoNotFound, self).__init__(message, vcs_logger)
+
 
 class InvalidRepo(VcsLiteError):
     """Missing required subfolder of components under repo."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidRepo, self).__init__(message, vcs_logger)
 
 
 class OutOfDate(VcsLiteError):
     """Current revision is older than the latest one."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(OutOfDate, self).__init__(message, vcs_logger)
+
 
 class CannotFindState(VcsLiteError):
     """Cannot find state in repo with provided session ID and revision."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(CannotFindState, self).__init__(message, vcs_logger)
 
 
 class Repo(object):
@@ -86,7 +98,9 @@ class Repo(object):
         check_type(repo_dir, [str, Path])
 
         repo_dir = Path(repo_dir)
-        self._repo_dir = repo_dir.resolve()
+        check_path(repo_dir)
+
+        self._repo_dir = repo_dir
         self._deep_dir = self._repo_dir.joinpath(VCS_FOLDER, REPO['FOLDER'])
         self._blob_dir = self._deep_dir.joinpath(BLOB['FOLDER'])
         self._state_dir = self._deep_dir.joinpath(STATE['FOLDER'])
@@ -105,9 +119,11 @@ class Repo(object):
             )
             self.save()
         elif not self._deep_dir.exists():
-            raise RepoNotFound()
+            self._enable_log()
+            raise RepoNotFound('RepoNotFound: {}'.format(self._deep_dir.as_posix()), _vcs_logger)
         elif not (self._blob_dir.exists() and self._state_dir.exists() and self._session_dir.exists()):
-            raise InvalidRepo()
+            self._enable_log()
+            raise InvalidRepo('InvalidRepo: {}'.format(self._deep_dir.as_posix()), _vcs_logger)
 
         self._enable_log()
 
@@ -182,7 +198,10 @@ class Repo(object):
 
         if current_session_id in self.all_session:
             if current_revision < self._session_manager.session_data[current_session_id].latest_revision:
-                raise OutOfDate()
+                raise OutOfDate(
+                    'OutOfDate: revision {} of session {}'.format(current_revision, current_session_id),
+                    _vcs_logger
+                )
 
         new_state = self._state_chain.new_state(target_wh, session_list, data, save=0)
 
@@ -228,13 +247,14 @@ class Repo(object):
 
         self._blob.store(target_wh)
 
-        log_info('State In :: stored blob with workspace hash')
-        log_info(target_wh)
+        log_debug('State In :: stored blob with workspace hash')
+        log_debug(target_wh)
 
         new_state.save()
 
         for session_id in session_list:
             self._session_manager.update_session(session_id)
+        log_info('State In :: succeed')
         return 1
 
     def state_out(self, target_wh, session_id, revision, overwrite):
@@ -251,6 +271,10 @@ class Repo(object):
         check_type(session_id, [str])
         check_type(revision, [int])
 
+        log_info('State Out ::')
+        log_info('----session_id: {}'.format(session_id))
+        log_info('----revision: {}'.format(revision))
+
         s = self.find_state(session_id, revision)
         state_wh = s.to_workspace_hash()
         if not overwrite:
@@ -261,9 +285,9 @@ class Repo(object):
         state_wh.set_workspace_dir(target_wh.workspace_dir)
         self._blob.extract(state_wh)
 
-        log_info('State Out: extracted blob with workspace hash')
-        log_info(state_wh)
-
+        log_debug('State Out: extracted blob with workspace hash')
+        log_debug(state_wh)
+        log_info('State Out :: succeed')
         return 1
 
     def find_state(self, session_id, revision):
@@ -286,7 +310,10 @@ class Repo(object):
             state_id = sess.revision_data[revision]
             s = self._state_chain.get_state(state_id)
         except Exception:
-            raise CannotFindState()
+            raise CannotFindState(
+                'CannotFindState: revision {} of session {}'.format(revision, session_id),
+                _vcs_logger
+            )
             s = None
         return s
 

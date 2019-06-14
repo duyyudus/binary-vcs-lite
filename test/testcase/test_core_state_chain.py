@@ -103,7 +103,7 @@ class TestStateChain(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    set_global_log_level(4)
+    set_global_log_level(5)
     testcase_classes = [
         TestStateChain,
     ]

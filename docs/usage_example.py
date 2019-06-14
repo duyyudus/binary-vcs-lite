@@ -105,16 +105,19 @@ def add_only_commit():
 
 def checkout():
     ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
+    ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_local.checkout('wip', ws_1_local.latest_revision('wip'))
 
 
 def checkout_overwrite():
     ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
+    ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_local.checkout('wip', ws_1_local.latest_revision('wip'), overwrite=1)
 
 
 def checkout_custom_dir():
     ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
+    ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
     ws_1_local.checkout(
         'wip',
         ws_1_local.latest_revision('wip'),

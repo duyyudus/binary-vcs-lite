@@ -59,7 +59,7 @@ class TestSessionManager(unittest.TestCase):
         try:
             sm = SessionManager('/not/exists/dir', sc)
         except Exception as e:
-            self.assertTrue(check_type(e, [session_manager.InvalidRepoSession]))
+            self.assertTrue(check_type(e, [session_manager.InvalidRepoSession, InvalidPath]))
         try:
             sm = SessionManager(self.sample_session_dir, None)
         except Exception as e:
@@ -80,7 +80,7 @@ class TestSessionManager(unittest.TestCase):
         try:
             sm.load_session('not/under/same/session_dir/session')
         except Exception as e:
-            self.assertTrue(check_type(e, [session_manager.InvalidSession]))
+            self.assertTrue(check_type(e, [session_manager.InvalidSession, PathMustBeAbsolute]))
 
     def test_new_session(self):
         sc = StateChain(self.output_state_dir)
@@ -138,7 +138,7 @@ class TestSessionManager(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    set_global_log_level(4)
+    set_global_log_level(5)
     testcase_classes = [
         TestSessionManager,
     ]

@@ -11,21 +11,36 @@ log_error = _vcs_logger.log_error
 class SessionNotFound(VcsLiteError):
     """Session not found."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(SessionNotFound, self).__init__(message, vcs_logger)
+
 
 class ClashingSession(VcsLiteError):
     """Session IDs are the same."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(ClashingSession, self).__init__(message, vcs_logger)
 
 
 class InvalidSession(VcsLiteError):
     """Session file is neither valid nor exist."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidSession, self).__init__(message, vcs_logger)
+
 
 class InvalidRepoSession(VcsLiteError):
     """There is no `session` folder in `.repo` folder."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidRepoSession, self).__init__(message, vcs_logger)
+
 
 class MissingStateChain(VcsLiteError):
     """An instance of `StateChain` must be provided."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(MissingStateChain, self).__init__(message, vcs_logger)
 
 
 class SessionManager(object):
@@ -63,16 +78,19 @@ class SessionManager(object):
         check_type(session_dir, [str, Path])
 
         session_dir = Path(session_dir)
-        if not session_dir.exists():
-            raise InvalidRepoSession()
         self._session_dir = session_dir
         self._all_session_id = []
         self._session_data = {}
 
+        if not session_dir.exists():
+            self._enable_log()
+            raise InvalidRepoSession('InvalidRepoSession: {}'.format(session_dir.as_posix()), _vcs_logger)
+
         if check_type(state_chain, [StateChain], raise_exception=0):
             self._state_chain = state_chain
         else:
-            raise MissingStateChain()
+            self._enable_log()
+            raise MissingStateChain('MissingStateChain:', _vcs_logger)
 
         self._enable_log()
 
@@ -114,13 +132,14 @@ class SessionManager(object):
             InvalidSession:
         """
         check_type(session_file, [str, Path])
+        check_path(session_file)
 
         session_file = Path(session_file)
         if session_file.parent != self._session_dir:
-            raise InvalidSession()
+            raise InvalidSession('InvalidSession: {}'.format(session_file.as_posix()), _vcs_logger)
         sess = Session(session_file)
         if not sess.load():
-            raise InvalidSession()
+            raise InvalidSession('InvalidSession: {}'.format(session_file.as_posix()), _vcs_logger)
         if sess.session_id not in self._session_data:
             self._session_data[sess.session_id] = sess
         if sess.session_id not in self._all_session_id:
@@ -138,7 +157,7 @@ class SessionManager(object):
         check_type(session_id, [str])
 
         if session_id in self._session_data:
-            raise ClashingSession()
+            raise ClashingSession('ClashingSession: {}'.format(session_id), _vcs_logger)
 
         session_file = self._session_dir.joinpath(session_id)
         sess = Session(session_file)
@@ -178,7 +197,7 @@ class SessionManager(object):
         check_type(relative_path, [str, Path, type(None)])
 
         if session_id not in self._session_data:
-            raise SessionNotFound()
+            raise SessionNotFound('SessionNotFound: {}'.format(session_id), _vcs_logger)
         sess = self._session_data[session_id]
         return sess.detail_file_version(revision, relative_path)
 
@@ -207,7 +226,7 @@ class SessionManager(object):
             list of int:
         """
         if session_id not in self._session_data:
-            raise SessionNotFound()
+            raise SessionNotFound('SessionNotFound: {}'.format(session_id), _vcs_logger)
 
         return self._session_data[session_id].all_revision
 
@@ -223,6 +242,6 @@ class SessionManager(object):
         check_type(session_id, [str])
 
         if session_id not in self._session_data:
-            raise SessionNotFound()
+            raise SessionNotFound('SessionNotFound: {}'.format(session_id), _vcs_logger)
 
         return self._session_data[session_id]

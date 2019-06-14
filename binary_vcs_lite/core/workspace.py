@@ -11,9 +11,15 @@ log_error = _vcs_logger.log_error
 class WorkspaceNotFound(VcsLiteError):
     """There is no repo folder."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(WorkspaceNotFound, self).__init__(message, vcs_logger)
+
 
 class InvalidWorkspace(VcsLiteError):
     """There is no METADATA file."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidWorkspace, self).__init__(message, vcs_logger)
 
 
 class Workspace(object):
@@ -73,16 +79,20 @@ class Workspace(object):
         check_type(session_id, [str])
 
         workspace_dir = Path(workspace_dir)
-        self._workspace_dir = workspace_dir.resolve()
+        check_path(workspace_dir)
+
+        self._workspace_dir = workspace_dir
         self._deep_dir = self._workspace_dir.joinpath(VCS_FOLDER, WORKSPACE['FOLDER'])
         self._metadata_path = self._deep_dir.joinpath(WORKSPACE['METADATA']['FILE'])
 
         if init and not self._metadata_path.exists():
             self._deep_dir.mkdir(parents=1, exist_ok=1)
         elif not self._deep_dir.exists():
-            raise WorkspaceNotFound()
+            self._enable_log()
+            raise WorkspaceNotFound('WorkspaceNotFound: {}'.format(self._deep_dir.as_posix()), _vcs_logger)
         elif not self._metadata_path.exists():
-            raise InvalidWorkspace()
+            self._enable_log()
+            raise InvalidWorkspace('InvalidWorkspace: {}'.format(self._deep_dir.as_posix()), _vcs_logger)
 
         self._enable_log()
 
@@ -172,6 +182,8 @@ class Workspace(object):
         """
         Args:
             hash_value (str):
+        Returns:
+            str:
         """
         check_type(hash_value, [str])
         return self.workspace_hash.hash_to_path(hash_value)

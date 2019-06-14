@@ -57,7 +57,7 @@ class TestRepo(unittest.TestCase):
         try:
             Repo('/not/exists/dir', init=0)
         except Exception as e:
-            self.assertTrue(check_type(e, [repo.RepoNotFound]))
+            self.assertTrue(check_type(e, [repo.RepoNotFound, InvalidPath]))
 
     def test_properties(self):
         rp = Repo(TEST_OUTPUT_DATA_LOCAL_REPO_DIR, init=1)
@@ -162,7 +162,7 @@ class TestRepo(unittest.TestCase):
 
 @log_test(__file__)
 def run():
-    set_global_log_level(4)
+    set_global_log_level(5)
     testcase_classes = [
         TestRepo,
     ]

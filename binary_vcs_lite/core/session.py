@@ -10,6 +10,9 @@ log_error = _vcs_logger.log_error
 class RevisionNotFound(VcsLiteError):
     """Revision not found."""
 
+    def __init__(self, message='', vcs_logger=None):
+        super(RevisionNotFound, self).__init__(message, vcs_logger)
+
 
 class Session(object):
     """Handle session data and behavior.
@@ -219,7 +222,7 @@ class Session(object):
         revision = revision if revision else self.latest_revision
         revision = str(revision)
         if revision not in self._detail_version_data:
-            raise RevisionNotFound()
+            raise RevisionNotFound('RevisionNotFound: {}'.format(revision), _vcs_logger)
         file_versions = copy.deepcopy(self._detail_version_data[revision])
         if relative_path:
             relative_path = str(relative_path)
