@@ -98,15 +98,15 @@ class TestState(unittest.TestCase):
             self.assertGreater(len(n), 0)
 
     def test_set_next(self):
-        s0 = State('path/to/s0')
-        s1 = State('path/to/s1')
+        s0 = State(Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).joinpath('path/to/s0'))
+        s1 = State(Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).joinpath('path/to/s1'))
         s0.set_next(s1)
         self.assertIs(s0.next, s1)
         self.assertIs(s1.previous, s0)
 
     def test_set_previous(self):
-        s0 = State('path/to/s0')
-        s1 = State('path/to/s1')
+        s0 = State(Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).joinpath('path/to/s0'))
+        s1 = State(Path(TEST_OUTPUT_DATA_LOCAL_REPO_DIR).joinpath('path/to/s1'))
         s1.set_previous(s0)
         self.assertIs(s0.next, s1)
         self.assertIs(s1.previous, s0)

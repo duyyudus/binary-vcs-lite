@@ -43,7 +43,7 @@ class TestStateChain(unittest.TestCase):
             self.assertEqual(sc.state_data[i].state_id, i)
 
         try:
-            sc = StateChain('/not/exists/dir')
+            sc = StateChain(Path(__file__).parent.joinpath('not/exists/dir'))
         except Exception as e:
             self.assertTrue(check_type(e, [state_chain.InvalidRepoState]))
 
@@ -62,7 +62,7 @@ class TestStateChain(unittest.TestCase):
         self.assertIs(sc.state_data['s1'].previous, sc.state_data['s0'])
 
         try:
-            sc.load_state('/not/under/same/state_dir/state')
+            sc.load_state(Path(__file__).parent.joinpath('not/under/same/state_dir/state'))
         except Exception as e:
             self.assertTrue(check_type(e, [state_chain.InvalidState]))
 

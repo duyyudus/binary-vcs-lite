@@ -81,6 +81,7 @@ class Repo(object):
         all_revision(session_id)
         all_session()
         detail_file_version(session_id, revision=None, relative_path=None)
+        ls_changes(target_wh, current_session_id, current_revision)
 
     """
 
@@ -111,7 +112,7 @@ class Repo(object):
             self._blob_dir.mkdir(parents=1, exist_ok=1)
             self._state_dir.mkdir(parents=1, exist_ok=1)
             self._session_dir.mkdir(parents=1, exist_ok=1)
-            self._repo_id = '{}_{}_{}_{}'.format(
+            self._repo_id = '{}-{}-{}-{}'.format(
                 os.environ['username'],
                 time.strftime('%Y%m%d'),
                 time.strftime('%H%M'),
@@ -192,6 +193,7 @@ class Repo(object):
         check_type(current_session_id, [str])
         check_type(current_revision, [int])
 
+        log_info(' ')
         log_info('State In ::')
         log_info('----current_session_id: {}'.format(current_session_id))
         log_info('----current_revision: {}'.format(current_revision))
@@ -199,7 +201,7 @@ class Repo(object):
         if current_session_id in self.all_session:
             if current_revision < self._session_manager.session_data[current_session_id].latest_revision:
                 raise OutOfDate(
-                    'OutOfDate: revision {} of session {}'.format(current_revision, current_session_id),
+                    'OutOfDate: revision {} of session "{}"'.format(current_revision, current_session_id),
                     _vcs_logger
                 )
 
@@ -271,6 +273,7 @@ class Repo(object):
         check_type(session_id, [str])
         check_type(revision, [int])
 
+        log_info(' ')
         log_info('State Out ::')
         log_info('----session_id: {}'.format(session_id))
         log_info('----revision: {}'.format(revision))
@@ -311,7 +314,7 @@ class Repo(object):
             s = self._state_chain.get_state(state_id)
         except Exception:
             raise CannotFindState(
-                'CannotFindState: revision {} of session {}'.format(revision, session_id),
+                'CannotFindState: revision {} of session "{}"'.format(revision, session_id),
                 _vcs_logger
             )
             s = None

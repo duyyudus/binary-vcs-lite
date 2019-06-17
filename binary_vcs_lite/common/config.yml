@@ -44,4 +44,4 @@ DEFAULT_FILE_PATTERN:
   INCLUDE:
     - '**/*'
   EXCLUDE:
-    - *vcs_folder
+    - '[.]vcs_lite'

@@ -51,14 +51,25 @@ class InvalidType(VcsLiteError):
 
 
 class InvalidPath(VcsLiteError):
-    """Invalid path."""
+    """Invalid path.
+
+    Condition:
+        Passing relative path to a must-be-absolute path parameter
+        Path starts with POSIX root on windows system, and vice versa
+    """
 
     def __init__(self, message='', vcs_logger=None):
         super(InvalidPath, self).__init__(message, vcs_logger)
 
 
 class VcsLogger(object):
-    """Custom logger for file versioning operations"""
+    """Custom logger for file versioning operations
+
+    How to use:
+        Create an instance of this class in global scope of target module
+        Setup that instance using info of target module
+        Pass that instance to any function/method that need to log
+    """
 
     def __init__(self):
         super(VcsLogger, self).__init__()
@@ -226,7 +237,10 @@ def copy_file(source, target, vcs_logger, overwrite=0):
         source (str|Path):
         target (str|Path):
     Returns:
-        bool:
+        ternary:
+            -1: skipped
+            0: failed
+            1: succeed
     """
 
     source = str(source)
@@ -249,7 +263,7 @@ def copy_file(source, target, vcs_logger, overwrite=0):
             return 0
 
     if Path(target).exists():
-        return 1
+        return -1
     else:
         try:
             shutil.copyfile(source, target)
@@ -266,20 +280,23 @@ def copy_file(source, target, vcs_logger, overwrite=0):
         return 1
 
 
-def batch_copy(path_pair, vcs_logger, overwrite=0):
+def batch_copy(path_pair, vcs_logger, message='Copied file', overwrite=0):
     """
     Args:
         path_pair (list of 2-tuple): List of 2-tuple of str, [(source, target),...]
-
     Returns:
         list of str: List of copied file paths
     """
 
     copied = []
-    for source, target in path_pair:
-        if copy_file(source, target, vcs_logger, overwrite):
+    batch_size = len(path_pair)
+    for i, p in enumerate(path_pair):
+        source, target = p
+        if copy_file(source, target, vcs_logger, overwrite) == 1:
             copied.append(str(target))
+        vcs_logger.log_info('{}: {}/{}'.format(message, str(i + 1), batch_size))
 
+    vcs_logger.log_info('Total newly copied files: {}'.format(len(copied)))
     return copied
 
 

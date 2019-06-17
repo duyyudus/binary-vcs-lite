@@ -47,6 +47,7 @@ class Workspace(object):
         revision (int):
         repo_id (str):
         workspace_hash (common.hashing.WorkspaceHash):
+        is_dirty (bool):
 
     Methods:
         set_file_pattern(file_pattern)
@@ -61,6 +62,8 @@ class Workspace(object):
         all_revision(session_id)
         all_session()
         detail_file_version(session_id, revision, relative_path)
+        ls_changes()
+        compare_revision(session_1, revision_1, session_2, revision_2)
 
     """
 
@@ -151,6 +154,16 @@ class Workspace(object):
             file_pattern=self._file_pattern,
             vcs_logger=_vcs_logger
         )
+
+    @property
+    def is_dirty(self):
+        """bool: check if there is any change between current workspace and current revision of current session."""
+        changes = self.ls_changes()
+        changes.pop('unchanged')
+        for c in changes.values():
+            if c:
+                return 1
+        return 0
 
     def set_file_pattern(self, file_pattern):
         """
@@ -366,7 +379,7 @@ class Workspace(object):
         return self._repo.detail_file_version(session_id, revision, relative_path)
 
     def ls_changes(self):
-        """Detect changes between current workspace and latest revision of current session
+        """Detect changes between current workspace and current revision of current session
 
         Returns:
             dict:
@@ -374,5 +387,25 @@ class Workspace(object):
         return self._repo.ls_changes(
             self.workspace_hash,
             self._session_id,
-            self.latest_revision(self._session_id)
+            self._revision
         )
+
+    def compare_revision(self, session_1, revision_1, session_2, revision_2):
+        """Return difference from one revision of session 2 to another revision of session 1
+
+        Equally as the transition from one revision of session 1 to one revision of session 2
+
+        Args:
+            session_1 (str): ID of session 1
+            revision_1 (int): revision of session 1
+            session_2 (str): ID of session 2
+            revision_2 (int): revision of session 2
+
+        Returns:
+            dict:
+        """
+        s1_id = self._repo._session_manager.get_session(session_1).revision_data[str(revision_1)]
+        s2_id = self._repo._session_manager.get_session(session_2).revision_data[str(revision_2)]
+        s1 = self._repo._state_chain.get_state(s1_id)
+        s2 = self._repo._state_chain.get_state(s2_id)
+        return self._repo._state_chain.compare_state(s1, s2, return_path=1)

@@ -50,6 +50,7 @@ class StateChain(object):
         load_state(state_file)
         new_state(workspace_hash, session_list, data, save=True)
         compare_state(s1, s2)
+        get_state(state_id)
 
     """
 
@@ -65,13 +66,13 @@ class StateChain(object):
         check_type(state_dir, [str, Path])
 
         state_dir = Path(state_dir)
+        check_path(state_dir)
 
         self._state_dir = state_dir
         self._all_state_id = []
         self._state_data = {}
 
         if not state_dir.exists():
-            self._enable_log()
             raise InvalidRepoState('InvalidRepoState: {}'.format(state_dir.as_posix()), _vcs_logger)
 
         self._enable_log()

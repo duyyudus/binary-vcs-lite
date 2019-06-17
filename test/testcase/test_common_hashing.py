@@ -36,7 +36,7 @@ class TestWorkspaceHash(unittest.TestCase):
                     # '*/*/*.png'
                 ],
                 'EXCLUDE': [
-                    VCS_FOLDER,
+                    '[.]vcs_lite',
                     # '.jpg$',
                     # '.tx$'
                 ]

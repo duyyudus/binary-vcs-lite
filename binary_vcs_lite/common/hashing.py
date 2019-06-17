@@ -169,6 +169,11 @@ def hash_workspace(workspace_dir,
     include_pattern = file_pattern['INCLUDE'] if file_pattern else DEFAULT_FILE_PATTERN['INCLUDE']
     exclude_pattern = file_pattern['EXCLUDE'] if file_pattern else DEFAULT_FILE_PATTERN['EXCLUDE']
 
+    vcs_logger.log_debug('Include Pattern ::')
+    vcs_logger.log_debug(include_pattern)
+    vcs_logger.log_debug('Exclude Pattern ::')
+    vcs_logger.log_debug(exclude_pattern)
+
     workspace_dir = Path(workspace_dir)
     workspace_hash = WorkspaceHash(workspace_dir)
     all_paths = []
@@ -178,6 +183,7 @@ def hash_workspace(workspace_dir,
     vcs_logger.log_debug('Hash digest info:')
     for p in all_paths:
         if match_regex_pattern(str(p), exclude_pattern):
+            vcs_logger.log_debug('Skipped excluded file: {}'.format(str(p)))
             continue
         if Path(p).is_dir():
             continue

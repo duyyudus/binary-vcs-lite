@@ -47,6 +47,7 @@ class Session(object):
         check_type(session_file, [str, Path])
 
         session_file = Path(session_file)
+        check_path(session_file)
 
         self._session_file = session_file
         self._session_id = session_file.name

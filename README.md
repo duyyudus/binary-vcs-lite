@@ -92,6 +92,12 @@ With 2 subclasses of `VersioningInterface`, we have two working scenarios
 
     It is just the file `VCS_FOLDER/WORKSPACE_FOLDER/METADATA`, store record of all repositories that workspace connected to.
 
+* `logging`
+
+    Log files are stored in this folder
+
+    Log file name format: `_username_yyyy-mm-dd.txt`
+
 ### `repo` components
 
 * `METADATA`
@@ -119,3 +125,13 @@ With 2 subclasses of `VersioningInterface`, we have two working scenarios
     Represent for working session
 
     Work as a filter on top of state chain
+
+* `logging`
+
+    Log files are stored in this folder
+
+    Log file name format: `_username_yyyy-mm-dd.txt`
+
+## Example
+
+Please look at `./docs/usage_example.py`

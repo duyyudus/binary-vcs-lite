@@ -52,6 +52,7 @@ class State(object):
         update(workspace_hash, session_list, data, save=True)
         save()
         load()
+        to_workspace_hash()
 
     """
 
@@ -66,6 +67,7 @@ class State(object):
         check_type(state_file, [str, Path])
 
         state_file = Path(state_file)
+        check_path(state_file)
 
         self._state_file = state_file
         self._state_id = self._state_file.name

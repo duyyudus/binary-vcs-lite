@@ -62,6 +62,9 @@ class SessionManager(object):
         new_session(session_id)
         update_session(session_id)
         detail_file_version(session_id, revision=None, relative_path=None)
+        latest_revision(session_id)
+        all_revision(session_id)
+        get_session(session_id)
 
     """
 
@@ -78,12 +81,13 @@ class SessionManager(object):
         check_type(session_dir, [str, Path])
 
         session_dir = Path(session_dir)
+        check_path(session_dir)
+
         self._session_dir = session_dir
         self._all_session_id = []
         self._session_data = {}
 
         if not session_dir.exists():
-            self._enable_log()
             raise InvalidRepoSession('InvalidRepoSession: {}'.format(session_dir.as_posix()), _vcs_logger)
 
         if check_type(state_chain, [StateChain], raise_exception=0):

@@ -16,12 +16,12 @@ _TEST_ROOT = Path(r'D:\temp\binary-vcs-lite-test-data')
 ASSET_FILE_PATTERN = {
     'INCLUDE': ['**/*'],
     'EXCLUDE': [
-        '.vcs_lite',
-        '.piece_common',
-        '.mov$',
-        '.tx$',
-        '.turntable.',
-        '.db$'
+        '[.]vcs_lite',
+        '[.]piece_common',
+        '[.]mov$',
+        '[.]tx$',
+        '[.]turntable.',
+        '[.]db$'
     ]
 }
 
@@ -77,6 +77,8 @@ def standard_commit():
 def ls_changes():
     ws_1_local = LocalVersioning(WORKSPACE_1_DIR, 'wip')
     ws_1_local.set_file_pattern(ASSET_FILE_PATTERN)
+    print('Is workspace dirty')
+    print(ws_1_local.is_dirty)
     print('Listing changes')
     print(ws_1_local.ls_changes())
 
@@ -126,16 +128,33 @@ def checkout_custom_dir():
 
 
 def fast_forward_commit():
+    # Start with `WORKSPACE_2_DIR` instead of `WORKSPACE_1_DIR`
     ws_2_remote = RemoteVersioning(WORKSPACE_2_DIR, CENTRAL_REPO_DIR, 'review')
 
-    # Commit to remote repo
+    # Commit to remote repo for both sessions "review" and "publish"
     ws_2_remote.set_file_pattern(ASSET_FILE_PATTERN)
     ws_2_remote.commit(
-        ['review'],
+        ['review', 'publish'],
         data={'message': 'workspace 2, remote commit 1'},
         add_only=0,
         fast_forward=1
     )
+
+
+def query_detail_file_version():
+    ws_1_remote = RemoteVersioning(WORKSPACE_1_DIR, CENTRAL_REPO_DIR, 'review')
+    ws_1_remote.set_file_pattern(ASSET_FILE_PATTERN)
+
+    # Detail file version of revision 1 in session "review"
+    ws_1_remote.detail_file_version('review', 1)
+
+
+def compare_revision():
+    ws_2_remote = RemoteVersioning(WORKSPACE_2_DIR, CENTRAL_REPO_DIR, 'review')
+    ws_2_remote.set_file_pattern(ASSET_FILE_PATTERN)
+
+    # Compare revision 2 of "review" and revision 1 of "publish"
+    ws_2_remote.compare_revision('review', 2, 'publish', 1)
 
 
 if __name__ == '__main__':
@@ -148,4 +167,6 @@ if __name__ == '__main__':
     # checkout_overwrite()
     # checkout_custom_dir()
     fast_forward_commit()
+    query_detail_file_version()
+    compare_revision()
     pass

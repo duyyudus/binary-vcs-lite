@@ -8,6 +8,8 @@ class TestBlob(unittest.TestCase):
 
     def setUp(self):
         create_output_workspace_dir()
+        blob_dir = Path(TEST_OUTPUT_DATA_WORKSPACE_DIR, VCS_FOLDER, REPO['FOLDER'], BLOB['FOLDER'])
+        blob_dir.mkdir(parents=1, exist_ok=1)
 
     def tearDown(self):
         cleanup_output_data()

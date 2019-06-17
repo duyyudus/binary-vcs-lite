@@ -8,6 +8,8 @@ from pathlib2 import Path
 _cur_file = Path(__file__).resolve()
 # Append parent directory of `binary_vcs_lite` package
 sys.path.append(str(_cur_file.parent.parent.parent))
+sys.path.append(str(_cur_file.parent.parent.parent.parent))
+
 
 # Append parent directory of `tree_util_lite` package
 # There must be a Git repo `tree-util-lite` in the same folder with `binary-vcs-lite` repo
@@ -34,7 +36,7 @@ from binary_vcs_lite.core import (
 
 from binary_vcs_lite import vcs_interface
 
-TEST_ROOT = Path(__file__).resolve().parent.parent
+TEST_ROOT = _cur_file.parent.parent
 TEST_SAMPLE_DATA_WORKSPACE_DIR = str(TEST_ROOT.joinpath('sample_data_workspace', 'last'))
 TEST_SAMPLE_DATA_REPO_DIR = str(TEST_ROOT.joinpath('sample_data_repo', 'last'))
 

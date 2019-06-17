@@ -10,6 +10,13 @@ log_debug = _vcs_logger.log_debug
 log_error = _vcs_logger.log_error
 
 
+class InvalidRepoBlob(VcsLiteError):
+    """There is no `blob` folder in `.repo` folder."""
+
+    def __init__(self, message='', vcs_logger=None):
+        super(InvalidRepoBlob, self).__init__(message, vcs_logger)
+
+
 class Blob(object):
     """Manage data blob.
 
@@ -41,7 +48,14 @@ class Blob(object):
         super(Blob, self).__init__()
         check_type(blob_dir, [str, Path])
 
-        self._blob_dir = Path(blob_dir)
+        blob_dir = Path(blob_dir)
+        check_path(blob_dir)
+
+        self._blob_dir = blob_dir
+
+        if not blob_dir.exists():
+            raise InvalidRepoBlob('InvalidRepoBlob: {}'.format(blob_dir.as_posix()), _vcs_logger)
+
         self._enable_log()
 
     @property
@@ -96,12 +110,14 @@ class Blob(object):
                 ))
                 log_debug('----{}'.format(str(workspace_file)))
 
-        copied = batch_copy(path_pair, _vcs_logger)
+        copied = batch_copy(path_pair, _vcs_logger, '----Stored blob file')
         log_info('Stored all blobs')
         return copied
 
     def extract(self, workspace_hash):
         """Extract files from blob to working dir.
+
+        Existing files will be overwritten.
 
         Args:
             workspace_hash (common.hashing.WorkspaceHash):
@@ -129,6 +145,6 @@ class Blob(object):
                 ))
                 log_debug('----{}'.format(str(workspace_file)))
 
-        copied = batch_copy(path_pair, vcs_logger=_vcs_logger, overwrite=1)
+        copied = batch_copy(path_pair, _vcs_logger, '----Extracted blob file', overwrite=1)
         log_info('Extracted all blobs')
         return copied

@@ -13,6 +13,9 @@ class VersioningInterface(object):
     Properties:
         repo (core.repo.Repo):
         workspace (core.workspace.Workspace):
+        current_session (str):
+        current_revision (int):
+        is_dirty (bool):
 
     Methods:
         set_file_pattern(file_pattern)
@@ -23,6 +26,7 @@ class VersioningInterface(object):
         all_session()
         detail_file_version(session_id, revision, relative_path)
         ls_changes()
+        compare_revision(session_1, revision_1, session_2, revision_2)
     """
 
     def __init__(self, workspace_dir, repo_dir, session_id, init_workspace, init_repo):
@@ -44,11 +48,28 @@ class VersioningInterface(object):
 
     @property
     def repo(self):
+        """Repo: """
         return self._repo
 
     @property
     def workspace(self):
+        """Workspace: """
         return self._workspace
+
+    @property
+    def current_session(self):
+        """str: return ID of current session in `self._workspace`."""
+        return self._workspace.session_id
+
+    @property
+    def current_revision(self):
+        """int: """
+        return self._workspace.revision
+
+    @property
+    def is_dirty(self):
+        """bool: check if there is any change between current workspace and current revision of current session."""
+        return self._workspace.is_dirty
 
     def set_file_pattern(self, file_pattern):
         """Wrap same method in `self._workspace`
@@ -140,6 +161,23 @@ class VersioningInterface(object):
             dict:
         """
         return self._workspace.ls_changes()
+
+    def compare_revision(self, session_1, revision_1, session_2, revision_2):
+        """Wrap same method in `self._workspace`
+
+        Return difference from one revision of session 2 to another revision of session 1
+        Equally as the transition from one revision of session 1 to one revision of session 2
+
+        Args:
+            session_1 (str): ID of session 1
+            revision_1 (int): revision of session 1
+            session_2 (str): ID of session 2
+            revision_2 (int): revision of session 2
+
+        Returns:
+            dict:
+        """
+        return self._workspace.compare_revision(session_1, revision_1, session_2, revision_2)
 
 
 class LocalVersioning(VersioningInterface):
