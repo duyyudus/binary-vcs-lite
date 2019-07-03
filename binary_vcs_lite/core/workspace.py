@@ -238,15 +238,18 @@ class Workspace(object):
             if current_session_id in session_list:
                 self._revision += 1
                 self.save()
+                log_info('Current revision of "{}" is {}'.format(current_session_id, self._revision))
 
-        log_info('Commit succeed')
+            log_info('Commit succeed')
+        else:
+            log_info('Commit failed')
 
     def checkout(self, session_id, revision, checkout_dir=None, overwrite=False):
         """
         Args:
             session_id (str):
             revision (int):
-            checkout_dir (Path, None by default):
+            checkout_dir (str|Path, None by default):
             overwrite (bool, False by default):
         """
         check_type(session_id, [str])
@@ -267,8 +270,9 @@ class Workspace(object):
             self._session_id = session_id
             self._revision = revision
             self.save()
-
-        log_info('Checkout succeed')
+            log_info('Checkout succeed')
+        else:
+            log_info('Checkout failed')
 
     def save(self):
         """Save workspace info to METADATA file."""

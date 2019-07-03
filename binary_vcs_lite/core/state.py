@@ -215,5 +215,11 @@ class State(object):
         Returns:
             WorkspaceHash:
         """
+        log_debug('Creating workspace hash from state "{}"'.format(self._state_id))
         paths_with_hash = self._state_tree.ls_all_leaves(relative=1)
-        return hashing.workspace_hash_from_paths(paths_with_hash)
+        log_debug('List of file paths in state:')
+        log_debug(paths_with_hash)
+        ws = hashing.workspace_hash_from_paths(paths_with_hash)
+        log_debug('Result workspace hash:')
+        log_debug(ws)
+        return ws

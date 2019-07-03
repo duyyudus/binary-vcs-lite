@@ -90,7 +90,7 @@ class VcsLogger(object):
         self.logger.setLevel(self.lvl)
         ch = logging.StreamHandler()
         ch.setLevel(self.lvl)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s | %(message)s')
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
 
@@ -122,7 +122,7 @@ class VcsLogger(object):
         ch.setLevel(self.lvl)
 
         # Create formatter
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s | %(message)s')
 
         # Add formatter
         fh.setFormatter(formatter)
@@ -347,8 +347,9 @@ def check_path(input_path):
         bool:
     """
     input_path = Path(input_path)
-    if os.name == 'nt' and input_path.as_posix().startswith('/'):
-        raise InvalidPath('InvalidPath: {}'.format(input_path.as_posix()))
+    if os.name == 'nt':
+        if input_path.as_posix()[:2] != '//' and input_path.as_posix().startswith('/'):
+            raise InvalidPath('InvalidPath: {}'.format(input_path.as_posix()))
     elif not (input_path.is_absolute() or input_path.as_posix().startswith('/')):
         raise PathMustBeAbsolute('PathMustBeAbsolute: {}'.format(input_path.as_posix()))
     return 1

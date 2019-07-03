@@ -75,6 +75,7 @@ class Repo(object):
                  current_revision,
                  add_only)
         state_out(target_wh, session_id, revision, overwrite)
+        find_state(session_id, revision)
         save()
         load()
         latest_revision(session_id)
@@ -198,7 +199,7 @@ class Repo(object):
         log_info('----current_session_id: {}'.format(current_session_id))
         log_info('----current_revision: {}'.format(current_revision))
 
-        if current_session_id in self.all_session:
+        if current_session_id in self.all_session and current_session_id in session_list:
             if current_revision < self._session_manager.session_data[current_session_id].latest_revision:
                 raise OutOfDate(
                     'OutOfDate: revision {} of session "{}"'.format(current_revision, current_session_id),
@@ -278,12 +279,16 @@ class Repo(object):
         log_info('----session_id: {}'.format(session_id))
         log_info('----revision: {}'.format(revision))
 
+        log_debug('Target workspace hash:')
+        log_debug(target_wh)
+
         s = self.find_state(session_id, revision)
         state_wh = s.to_workspace_hash()
         if not overwrite:
             for f in target_wh:
                 if f in state_wh:
-                    state_wh.pop(f)
+                    if Path(target_wh[f][WORKSPACE_HASH['ABSOLUTE_PATH_KEY']]).exists():
+                        state_wh.pop(f)
 
         state_wh.set_workspace_dir(target_wh.workspace_dir)
         self._blob.extract(state_wh)

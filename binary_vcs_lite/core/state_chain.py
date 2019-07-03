@@ -80,6 +80,12 @@ class StateChain(object):
         for f in state_dir.iterdir():
             self.load_state(f)
 
+        self._sort_state_id()
+
+        log_info('Initialized state chain')
+        log_debug('All state IDs:')
+        log_debug(self._all_state_id)
+
     def _reset(self):
         """For unit test only."""
         self._all_state_id = []
@@ -91,6 +97,10 @@ class StateChain(object):
             time.strftime('%Y-%m-%d')
         ))
         _vcs_logger.setup(log_file, Path(__file__).stem)
+
+    def _sort_state_id(self):
+        sorted_ids = sorted([int(i[1:]) for i in self._all_state_id])
+        self._all_state_id = ['s' + str(i) for i in sorted_ids]
 
     @property
     def state_dir(self):
