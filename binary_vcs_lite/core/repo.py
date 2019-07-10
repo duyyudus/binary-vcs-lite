@@ -390,6 +390,7 @@ class Repo(object):
         check_type(current_session_id, [str])
         check_type(current_revision, [int])
 
+        current_state = self._state_chain.new_state(WorkspaceHash(''), [], data={}, save=0)
         if current_session_id in self._session_manager.session_data:
             sess = self._session_manager.get_session(current_session_id)
             if current_revision in sess.all_revision:
