@@ -94,7 +94,7 @@ class VcsLogger(object):
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
 
-    def setup(self, log_file, log_name, log_level=2):
+    def setup(self, log_file, log_name, log_level=2, save_log_file=0):
         self.log_file = log_file
         self.log_name = log_name
         self.lvl = self.lvl_map[_global_log_level] if _global_log_level else self.lvl_map[log_level]
@@ -112,10 +112,11 @@ class VcsLogger(object):
         self.logger.setLevel(self.lvl)
 
         # Create file handler and set level
-        if not Path(log_file).parent.exists():
-            Path(log_file).parent.mkdir(parents=1)
-        fh = logging.FileHandler(filename=str(log_file), mode='a')
-        fh.setLevel(self.lvl)
+        if save_log_file:
+            if not Path(log_file).parent.exists():
+                Path(log_file).parent.mkdir(parents=1)
+            fh = logging.FileHandler(filename=str(log_file), mode='a')
+            fh.setLevel(self.lvl)
 
         # Create console handler and set level
         ch = logging.StreamHandler()
@@ -125,12 +126,14 @@ class VcsLogger(object):
         formatter = logging.Formatter('%(asctime)s - %(levelname)s | %(message)s')
 
         # Add formatter
-        fh.setFormatter(formatter)
+        if save_log_file:
+            fh.setFormatter(formatter)
         ch.setFormatter(formatter)
 
         # Add handlers to self.logger
         self.logger.addHandler(ch)
-        self.logger.addHandler(fh)
+        if save_log_file:
+            self.logger.addHandler(fh)
 
     def _log_message(self, args):
         def fstr(s):
